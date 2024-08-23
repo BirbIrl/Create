@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.simibubi.create.AllPackets;
 import com.simibubi.create.compat.computercraft.AttachedComputerPacket;
+import com.simibubi.create.compat.computercraft.events.ComputerEvent;
 import com.simibubi.create.compat.computercraft.implementation.ComputerBehaviour;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 
@@ -59,6 +60,23 @@ public abstract class SyncedPeripheral<T extends SmartBlockEntity> implements IP
 	@Override
 	public boolean equals(@Nullable IPeripheral other) {
 		return this == other;
+	}
+
+	public void prepareComputerEvent(@NotNull ComputerEvent event) {}
+
+	/**
+	 * Queue an event to all attached computers. Adds the peripheral attachment name as 1st event argument, followed by
+	 * any optional arguments passed to this method.
+	 */
+	protected void queueEvent(@NotNull String event, @Nullable Object... arguments) {
+		Object[] sourceAndArgs = new Object[arguments.length + 1];
+		System.arraycopy(arguments, 0, sourceAndArgs, 1, arguments.length);
+		synchronized (computers) {
+			for (IComputerAccess computer : computers) {
+				sourceAndArgs[0] = computer.getAttachmentName();
+				computer.queueEvent(event, sourceAndArgs);
+			}
+		}
 	}
 
 }
