@@ -6,9 +6,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.Create;
+import com.simibubi.create.compat.Mods;
+import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
+import com.simibubi.create.compat.computercraft.ComputerCraftProxy;
 import com.simibubi.create.content.contraptions.actors.psi.PortableStorageInterfaceBlockEntity;
 import com.simibubi.create.content.kinetics.crafter.MechanicalCrafterBlockEntity;
 import com.simibubi.create.content.logistics.BigItemStack;
@@ -34,10 +38,13 @@ import com.simibubi.create.foundation.blockEntity.behaviour.inventory.InvManipul
 import com.simibubi.create.foundation.blockEntity.behaviour.inventory.VersionedInventoryTrackerBehaviour;
 import com.simibubi.create.foundation.item.ItemHelper;
 
+import dan200.computercraft.api.peripheral.PeripheralCapability;
+import net.createmod.catnip.codecs.CatnipCodecUtils;
 import net.createmod.catnip.data.Iterate;
 import net.createmod.catnip.nbt.NBTHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
@@ -77,6 +84,10 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 	public int animationTicks;
 	public boolean animationInward;
 
+	public AbstractComputerBehaviour computerBehaviour;
+	public Boolean hasCustomComputerAddress = false;
+	public String CustomComputerAddress = "";
+
 	private InventorySummary availableItems;
 	private VersionedInventoryTrackerBehaviour invVersionTracker;
 
@@ -99,12 +110,27 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 		buttonCooldown = 0;
 	}
 
+	public static void registerCapabilities(RegisterCapabilitiesEvent event) {
+		event.registerBlockEntity(
+			Capabilities.ItemHandler.BLOCK,
+			AllBlockEntityTypes.PACKAGER.get(),
+			(be, context) -> be.inventory
+		);
+		if (Mods.COMPUTERCRAFT.isLoaded()) {
+			event.registerBlockEntity(
+				PeripheralCapability.get(),
+				AllBlockEntityTypes.PACKAGER.get(),
+				(be, context) -> be.computerBehaviour.getPeripheralCapability());
+		}
+	}
+
 	@Override
 	public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
 		behaviours.add(targetInventory = new InvManipulationBehaviour(this, InterfaceProvider.oppositeOfBlockFacing())
 			.withFilter(this::supportsBlockEntity));
 		behaviours.add(invVersionTracker = new VersionedInventoryTrackerBehaviour(this));
 		behaviours.add(advancements = new AdvancementBehaviour(this, AllAdvancements.PACKAGER));
+		behaviours.add(computerBehaviour = ComputerCraftProxy.behaviour(this));
 	}
 
 	private boolean supportsBlockEntity(BlockEntity target) {
@@ -160,7 +186,7 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 	public InventorySummary getAvailableItems() {
 		return getAvailableItems(false);
 	}
-	
+
 	public InventorySummary getAvailableItems(boolean scanInputSlots) {
 		if (availableItems != null && invVersionTracker.stillWaiting(targetInventory.getInventory()))
 			return availableItems;
@@ -571,6 +597,9 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 			if (address == null || address.isBlank())
 				continue;
 			signBasedAddress = address;
+		}
+		if (computerBehaviour.hasAttachedComputer() && hasCustomComputerAddress) {
+			signBasedAddress = CustomComputerAddress;
 		}
 	}
 
