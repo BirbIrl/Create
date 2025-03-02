@@ -10,6 +10,9 @@ import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.Create;
+import com.simibubi.create.compat.Mods;
+import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
+import com.simibubi.create.compat.computercraft.ComputerCraftProxy;
 import com.simibubi.create.content.contraptions.actors.psi.PortableStorageInterfaceBlockEntity;
 import com.simibubi.create.content.kinetics.crafter.MechanicalCrafterBlockEntity;
 import com.simibubi.create.content.logistics.BigItemStack;
@@ -35,6 +38,7 @@ import com.simibubi.create.foundation.blockEntity.behaviour.inventory.InvManipul
 import com.simibubi.create.foundation.blockEntity.behaviour.inventory.VersionedInventoryTrackerBehaviour;
 import com.simibubi.create.foundation.item.ItemHelper;
 
+import dan200.computercraft.api.peripheral.PeripheralCapability;
 import net.createmod.catnip.codecs.CatnipCodecUtils;
 import net.createmod.catnip.data.Iterate;
 import net.createmod.catnip.nbt.NBTHelper;
@@ -79,6 +83,10 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 	public int animationTicks;
 	public boolean animationInward;
 
+	public AbstractComputerBehaviour computerBehaviour;
+	public Boolean hasCustomComputerAddress = false;
+	public String CustomComputerAddress = "";
+
 	private InventorySummary availableItems;
 	private VersionedInventoryTrackerBehaviour invVersionTracker;
 
@@ -106,6 +114,12 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 			AllBlockEntityTypes.PACKAGER.get(),
 			(be, context) -> be.inventory
 		);
+		if (Mods.COMPUTERCRAFT.isLoaded()) {
+			event.registerBlockEntity(
+				PeripheralCapability.get(),
+				AllBlockEntityTypes.PACKAGER.get(),
+				(be, context) -> be.computerBehaviour.getPeripheralCapability());
+		}
 	}
 
 	@Override
@@ -114,6 +128,7 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 			.withFilter(this::supportsBlockEntity));
 		behaviours.add(invVersionTracker = new VersionedInventoryTrackerBehaviour(this));
 		behaviours.add(advancements = new AdvancementBehaviour(this, AllAdvancements.PACKAGER));
+		behaviours.add(computerBehaviour = ComputerCraftProxy.behaviour(this));
 	}
 
 	private boolean supportsBlockEntity(BlockEntity target) {
@@ -579,6 +594,9 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 			if (address == null || address.isBlank())
 				continue;
 			signBasedAddress = address;
+		}
+		if (computerBehaviour.hasAttachedComputer() && hasCustomComputerAddress) {
+			signBasedAddress = CustomComputerAddress;
 		}
 	}
 

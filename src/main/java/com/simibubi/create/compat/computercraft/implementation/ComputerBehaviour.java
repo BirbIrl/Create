@@ -9,6 +9,10 @@ import com.simibubi.create.compat.computercraft.implementation.peripherals.Speed
 import com.simibubi.create.compat.computercraft.implementation.peripherals.SpeedGaugePeripheral;
 import com.simibubi.create.compat.computercraft.implementation.peripherals.StationPeripheral;
 import com.simibubi.create.compat.computercraft.implementation.peripherals.StressGaugePeripheral;
+import com.simibubi.create.compat.computercraft.implementation.peripherals.StockTickerPeripheral;
+import com.simibubi.create.compat.computercraft.implementation.peripherals.PackagerPeripheral;
+import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
+import com.simibubi.create.content.logistics.stockTicker.StockTickerBlockEntity;
 import com.simibubi.create.content.kinetics.gauge.SpeedGaugeBlockEntity;
 import com.simibubi.create.content.kinetics.gauge.StressGaugeBlockEntity;
 import com.simibubi.create.content.kinetics.speedController.SpeedControllerBlockEntity;
@@ -43,6 +47,10 @@ public class ComputerBehaviour extends AbstractComputerBehaviour {
 			return () -> new SpeedGaugePeripheral(sgbe);
 		if (be instanceof StressGaugeBlockEntity sgbe)
 			return () -> new StressGaugePeripheral(sgbe);
+		if (be instanceof StockTickerBlockEntity sgbe)
+			return () -> new StockTickerPeripheral(sgbe);
+		if (be instanceof PackagerBlockEntity pgbe)
+			return () -> new PackagerPeripheral(pgbe);
 		if (be instanceof StationBlockEntity sbe)
 			return () -> new StationPeripheral(sbe);
 
