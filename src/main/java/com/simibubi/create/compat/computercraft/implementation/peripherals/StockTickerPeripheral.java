@@ -120,15 +120,20 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 					String filterEnchantmentName = (String) (filterEnchantmentEntry.get("name"));
 					Double filterEnchantmentLevel = 0.0;
 					boolean CheckEnchantmentLevel = false;
+					boolean CheckEnchantmentName = false;
 					if (filterEnchantmentEntry.get("level") instanceof Double) {
 						filterEnchantmentLevel = (Double) (filterEnchantmentEntry.get("level"));
 						CheckEnchantmentLevel = true;
+					}
+					if (filterEnchantmentEntry.get("name") instanceof String) {
+						filterEnchantmentName = (String) (filterEnchantmentEntry.get("name"));
+						CheckEnchantmentName = true;
 					}
 					for (HashMap<String, ?> itemEnchantmentEntry : itemEnchantments) {
 						String itemEnchantmentName = (String) itemEnchantmentEntry.get("name");
 						Integer itemEnchantmentLevel = (Integer) (itemEnchantmentEntry.get("level"));
 
-						if (itemEnchantmentName.equals(filterEnchantmentName)
+						if ((!CheckEnchantmentName || itemEnchantmentName.equals(filterEnchantmentName))
 								&& (!CheckEnchantmentLevel
 										|| (itemEnchantmentLevel.doubleValue()) == filterEnchantmentLevel)) {
 							filterMatches++;
@@ -196,7 +201,7 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 	 * (default value "")
 	 *
 	 * It then adds items that match the name if provided, nbt if provided, have all
-	 * of the tags if provided, excluisvely match all the enchants if provided and
+	 * of the tags if provided, has all the enchants if provided and
 	 * stops looking after adding items equal to count or finishing
 	 * going through the summary.
 	 * filter of {} requests all items from the network trollface.jpeg
