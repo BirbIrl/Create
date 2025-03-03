@@ -23,9 +23,13 @@ public class PackagerPeripheral extends SyncedPeripheral<PackagerBlockEntity> {
 	}
 
 	@LuaFunction(mainThread = true)
-	public final float makePackage() {
-		blockEntity.activate();
-		return 1;
+	public final boolean makePackage() {
+		if (!blockEntity.heldBox.isEmpty())
+			return false;
+		blockEntity.activate(); // activate() doesn't return a value so i'm walking around it
+		if (blockEntity.heldBox.isEmpty())
+			return false;
+		return true;
 	}
 
 	@LuaFunction(mainThread = true)
@@ -42,6 +46,7 @@ public class PackagerPeripheral extends SyncedPeripheral<PackagerBlockEntity> {
 		return result;
 	}
 
+	// sets the packagaer's address. Clears once it gets reloaded for safety
 	@LuaFunction(mainThread = true)
 	public final String setAddress(IArguments arguments) throws LuaException {
 		Object argument = arguments.get(0);
