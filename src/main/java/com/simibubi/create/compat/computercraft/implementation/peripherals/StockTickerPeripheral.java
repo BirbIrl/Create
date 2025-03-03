@@ -202,9 +202,9 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 	 * filter of {} requests all items from the network trollface.jpeg
 	 */
 	@LuaFunction(mainThread = true)
-	public final String request(IArguments arguments) throws LuaException {
+	public final int request(IArguments arguments) throws LuaException {
 		if (!(arguments.get(0) instanceof Map<?, ?>))
-			return "false";
+			return 0;
 		Map<?, ?> filter = (Map<?, ?>) arguments.get(0);
 		String address;
 		// Computercraft has forced my hand to make this dollar store filter algo
@@ -247,7 +247,7 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 		 * PackageOrder(itemsToOrder),
 		 * address, false, new PackageOrder(stacks);
 		 */
-		return "Requested " + String.valueOf(totalItemCount) + " item(s)";
+		return totalItemCount;
 	}
 
 	@NotNull
