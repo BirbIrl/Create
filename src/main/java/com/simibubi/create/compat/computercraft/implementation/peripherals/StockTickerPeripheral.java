@@ -7,6 +7,8 @@ import com.simibubi.create.content.logistics.BigItemStack;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBehaviour.RequestType;
 import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
@@ -109,6 +111,9 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 				Map<String, Map<String, ?>> filterEnchantments = (Map<String, Map<String, ?>>) filterEnchantmentsObject;
 				@SuppressWarnings("unchecked")
 				ArrayList<HashMap<String, ?>> itemEnchantments = (ArrayList<HashMap<String, ?>>) itemEnchantmentsObject;
+				if (filterEnchantments.size() != itemEnchantments.size())
+					return 0;
+				Set<HashMap<String, ?>> matchedItemEnchantments = new HashSet<>();
 				for (Map.Entry<String, ?> filterEnchantmentNode : filterEnchantments.entrySet()) {
 					int filterMatches = 0;
 					if (!(filterEnchantmentNode.getValue() instanceof Map<?, ?>)) {
@@ -118,9 +123,11 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 					@SuppressWarnings("unchecked")
 					Map<String, ?> filterEnchantmentEntry = (Map<String, ?>) (filterEnchantmentNode.getValue());
 					String filterEnchantmentName = (String) (filterEnchantmentEntry.get("name"));
+					String filterEnchantmentDisplayName = (String) (filterEnchantmentEntry.get("displayName"));
 					Double filterEnchantmentLevel = 0.0;
-					boolean CheckEnchantmentLevel = false;
 					boolean CheckEnchantmentName = false;
+					boolean CheckEnchantmentDisplayName = false;
+					boolean CheckEnchantmentLevel = false;
 					if (filterEnchantmentEntry.get("level") instanceof Double) {
 						filterEnchantmentLevel = (Double) (filterEnchantmentEntry.get("level"));
 						CheckEnchantmentLevel = true;
@@ -129,13 +136,23 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 						filterEnchantmentName = (String) (filterEnchantmentEntry.get("name"));
 						CheckEnchantmentName = true;
 					}
+					if (filterEnchantmentEntry.get("displayName") instanceof String) {
+						filterEnchantmentDisplayName = (String) (filterEnchantmentEntry.get("displayName"));
+						CheckEnchantmentDisplayName = true;
+					}
 					for (HashMap<String, ?> itemEnchantmentEntry : itemEnchantments) {
 						String itemEnchantmentName = (String) itemEnchantmentEntry.get("name");
+						String itemEnchantmentDisplayName = (String) (itemEnchantmentEntry.get("displayName"));
 						Integer itemEnchantmentLevel = (Integer) (itemEnchantmentEntry.get("level"));
 
-						if ((!CheckEnchantmentName || itemEnchantmentName.equals(filterEnchantmentName))
+						if (!matchedItemEnchantments.contains(itemEnchantmentEntry)
+								&& (!CheckEnchantmentName || itemEnchantmentName.equals(filterEnchantmentName))
+								&& (!CheckEnchantmentDisplayName
+										|| (itemEnchantmentDisplayName.equals(filterEnchantmentDisplayName)))
 								&& (!CheckEnchantmentLevel
-										|| (itemEnchantmentLevel.doubleValue()) == filterEnchantmentLevel)) {
+										|| (itemEnchantmentLevel
+												.doubleValue()) == filterEnchantmentLevel)) {
+							matchedItemEnchantments.add(itemEnchantmentEntry); // one itemenchant per filter
 							filterMatches++;
 						}
 					}
