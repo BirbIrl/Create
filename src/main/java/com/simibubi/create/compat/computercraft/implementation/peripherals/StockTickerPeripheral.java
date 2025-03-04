@@ -170,7 +170,6 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 	@LuaFunction(mainThread = true)
 	public final int getItemCount() {
 		return blockEntity.getAccurateSummary().getTotalCount();
-		// this.targetSpeed.setValue(speed);
 	}
 
 	@LuaFunction(mainThread = true)
@@ -185,7 +184,6 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 			result.put(i, details);
 		}
 		return result;
-		// return this.targetSpeed.getValue();
 	}
 
 	@LuaFunction(mainThread = true)
@@ -200,7 +198,6 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 			result.put(i, details);
 		}
 		return result;
-		// return this.targetSpeed.getValue();C
 	}
 
 	/*
