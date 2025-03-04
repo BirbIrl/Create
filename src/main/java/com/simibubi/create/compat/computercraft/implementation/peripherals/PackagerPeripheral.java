@@ -23,6 +23,11 @@ public class PackagerPeripheral extends SyncedPeripheral<PackagerBlockEntity> {
 	}
 
 	@LuaFunction(mainThread = true)
+	public final int getItemCount() {
+		return blockEntity.getAvailableItems().getTotalCount();
+	}
+
+	@LuaFunction(mainThread = true)
 	public final boolean makePackage() {
 		if (!blockEntity.heldBox.isEmpty())
 			return false;
