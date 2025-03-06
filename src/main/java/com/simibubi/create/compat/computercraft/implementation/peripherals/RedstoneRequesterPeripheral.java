@@ -2,12 +2,11 @@ package com.simibubi.create.compat.computercraft.implementation.peripherals;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.simibubi.create.content.logistics.stockTicker.StockTickerBlockEntity;
+import com.simibubi.create.content.logistics.redstoneRequester.RedstoneRequesterBlockEntity;
 import com.simibubi.create.content.logistics.BigItemStack;
 import com.simibubi.create.compat.computercraft.implementation.LuaUtil;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBehaviour.RequestType;
 import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
@@ -15,48 +14,14 @@ import java.util.ArrayList;
 import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.LuaException;
-import dan200.computercraft.api.detail.VanillaDetailRegistries;
 
-public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEntity> {
+public class RedstoneRequesterPeripheral extends SyncedPeripheral<RedstoneRequesterBlockEntity> {
 
 	// private final ScrollValueBehaviour targetSpeed;
 
-	public StockTickerPeripheral(StockTickerBlockEntity blockEntity) {
+	public RedstoneRequesterPeripheral(RedstoneRequesterBlockEntity blockEntity) {
 		super(blockEntity);
 		// this.targetSpeed = targetSpeed;
-	}
-
-	@LuaFunction(mainThread = true)
-	public final int getItemCount() {
-		return blockEntity.getAccurateSummary().getTotalCount();
-	}
-
-	@LuaFunction(mainThread = true)
-	public final Map<Integer, Map<String, ?>> list() {
-		Map<Integer, Map<String, ?>> result = new HashMap<>();
-		int i = 0;
-		for (BigItemStack entry : blockEntity.getAccurateSummary().getStacks()) {
-			i++;
-			Map<String, Object> details = new HashMap<>(
-					VanillaDetailRegistries.ITEM_STACK.getBasicDetails(entry.stack));
-			details.put("count", entry.count);
-			result.put(i, details);
-		}
-		return result;
-	}
-
-	@LuaFunction(mainThread = true)
-	public final Map<Integer, Map<String, ?>> listDetailed() {
-		Map<Integer, Map<String, ?>> result = new HashMap<>();
-		int i = 0;
-		for (BigItemStack entry : blockEntity.getAccurateSummary().getStacks()) {
-			i++;
-			Map<String, Object> details = new HashMap<>(
-					VanillaDetailRegistries.ITEM_STACK.getDetails(entry.stack));
-			details.put("count", entry.count);
-			result.put(i, details);
-		}
-		return result;
 	}
 
 	/*
@@ -131,7 +96,7 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 	@NotNull
 	@Override
 	public String getType() {
-		return "Create_StockTicker";
+		return "Create_RedstoneRequester";
 	}
 
 }

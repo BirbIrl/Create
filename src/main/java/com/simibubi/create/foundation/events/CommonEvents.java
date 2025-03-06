@@ -42,6 +42,7 @@ import com.simibubi.create.content.logistics.packagePort.postbox.PostboxBlockEnt
 import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
 import com.simibubi.create.content.logistics.packager.repackager.RepackagerBlockEntity;
 import com.simibubi.create.content.logistics.stockTicker.StockTickerBlockEntity;
+import com.simibubi.create.content.logistics.redstoneRequester.RedstoneRequesterBlockEntity;
 import com.simibubi.create.content.logistics.tunnel.BeltTunnelBlockEntity;
 import com.simibubi.create.content.logistics.tunnel.BrassTunnelBlockEntity;
 import com.simibubi.create.content.logistics.vault.ItemVaultBlockEntity;
@@ -288,6 +289,7 @@ public class CommonEvents {
 			SequencedGearshiftBlockEntity.registerCapabilities(event);
 			DisplayLinkBlockEntity.registerCapabilities(event);
 			StockTickerBlockEntity.registerCapabilities(event);
+			RedstoneRequesterBlockEntity.registerCapabilities(event);
 			PackagerBlockEntity.registerCapabilities(event);
 			RepackagerBlockEntity.registerCapabilities(event);
 			PostboxBlockEntity.registerCapabilities(event);
