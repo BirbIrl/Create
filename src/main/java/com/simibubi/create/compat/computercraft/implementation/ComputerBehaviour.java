@@ -3,6 +3,7 @@ package com.simibubi.create.compat.computercraft.implementation;
 import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
 import com.simibubi.create.compat.computercraft.implementation.peripherals.DisplayLinkPeripheral;
 import com.simibubi.create.compat.computercraft.implementation.peripherals.FrogportPeripheral;
+import com.simibubi.create.compat.computercraft.implementation.peripherals.PostboxPeripheral;
 import com.simibubi.create.compat.computercraft.implementation.peripherals.SequencedGearshiftPeripheral;
 import com.simibubi.create.compat.computercraft.implementation.peripherals.SpeedControllerPeripheral;
 import com.simibubi.create.compat.computercraft.implementation.peripherals.SpeedGaugePeripheral;
@@ -11,6 +12,7 @@ import com.simibubi.create.compat.computercraft.implementation.peripherals.Stres
 import com.simibubi.create.compat.computercraft.implementation.peripherals.StockTickerPeripheral;
 import com.simibubi.create.compat.computercraft.implementation.peripherals.PackagerPeripheral;
 import com.simibubi.create.content.logistics.packagePort.frogport.FrogportBlockEntity;
+import com.simibubi.create.content.logistics.packagePort.postbox.PostboxBlockEntity;
 import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
 import com.simibubi.create.content.logistics.stockTicker.StockTickerBlockEntity;
 import com.simibubi.create.content.kinetics.gauge.SpeedGaugeBlockEntity;
@@ -49,6 +51,8 @@ public class ComputerBehaviour extends AbstractComputerBehaviour {
 			return () -> new DisplayLinkPeripheral(dlbe);
 		if (be instanceof FrogportBlockEntity fpbe)
 			return () -> new FrogportPeripheral(fpbe);
+		if (be instanceof PostboxBlockEntity pbbe)
+			return () -> new PostboxPeripheral(pbbe);
 		if (be instanceof SequencedGearshiftBlockEntity sgbe)
 			return () -> new SequencedGearshiftPeripheral(sgbe);
 		if (be instanceof SpeedGaugeBlockEntity sgbe)
