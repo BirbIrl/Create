@@ -51,25 +51,22 @@ public class PackagerPeripheral extends SyncedPeripheral<PackagerBlockEntity> {
 		return result;
 	}
 
-	// sets the packagaer's address. Clears once it gets reloaded for safety
 	@LuaFunction(mainThread = true)
-	public final String setAddress(IArguments arguments) throws LuaException {
+	public final void setAddress(IArguments arguments) throws LuaException {
 		Object argument = arguments.get(0);
 		if (argument instanceof String) {
 			blockEntity.CustomComputerAddress = (String) argument;
 			blockEntity.hasCustomComputerAddress = true;
-			return blockEntity.CustomComputerAddress;
-		} else if (argument instanceof Double) {
-			if ((Double) argument == ((Double) argument).intValue()) // to get rid of the floating point
-				blockEntity.CustomComputerAddress = String.valueOf(((Double) argument).intValue());
-			else
-				blockEntity.CustomComputerAddress = String.valueOf((Double) argument);
-			blockEntity.hasCustomComputerAddress = true;
-			return blockEntity.CustomComputerAddress;
-		} else {
+		} else if (argument == null) {
 			blockEntity.hasCustomComputerAddress = false;
-			return null;
+		} else {
+			throw new LuaException("Argument must be string or nil");
 		}
+	}
+
+	@LuaFunction(mainThread = true)
+	public final String getAddress() throws LuaException {
+		return blockEntity.signBasedAddress;
 	}
 
 	@LuaFunction(mainThread = true)
