@@ -1,6 +1,7 @@
 package com.simibubi.create.compat.computercraft.implementation;
 
 import com.simibubi.create.content.logistics.BigItemStack;
+
 import dan200.computercraft.api.lua.LuaException;
 
 import java.util.HashMap;
@@ -11,14 +12,16 @@ import java.util.ArrayList;
 
 import dan200.computercraft.api.detail.VanillaDetailRegistries;
 
-public class LuaUtil {
+import net.neoforged.neoforge.items.IItemHandler;
+
+public class ComputerUtil {
 
 	// tldr: the computercraft api lets you parse items into lua-like-tables that cc
 	// uses for all it's items. to keep consistency with the rest of the inventory
 	// api in other parts of the mod i must do this terribleness. i am sorry.
 	public static int bigItemStackToLuaTableFilter(BigItemStack entry, Map<?, ?> filter) throws LuaException {
 		Map<String, Object> details = new HashMap<>(
-				VanillaDetailRegistries.ITEM_STACK.getDetails(entry.stack));
+			VanillaDetailRegistries.ITEM_STACK.getDetails(entry.stack));
 		details.put("count", entry.count);
 		if (filter.containsKey("name"))
 			if (filter.get("name") instanceof String) {
@@ -68,7 +71,7 @@ public class LuaUtil {
 				for (Map.Entry<String, Boolean> filterTagEntry : filterTags.entrySet()) {
 					if (!(filterTagEntry.getValue() instanceof Boolean)) {
 						throw new LuaException(
-								"Tags filter must be a table of tags like: \n{tags = { \n	[\"minecraft:logs\"] = true} \n	{diamonds = true}\n}}");
+							"Tags filter must be a table of tags like: \n{tags = { \n	[\"minecraft:logs\"] = true} \n	{diamonds = true}\n}}");
 					}
 					int filterMatches = 0;
 					for (Map.Entry<String, Boolean> itemTagEntry : itemTags.entrySet()) {
@@ -104,7 +107,7 @@ public class LuaUtil {
 					int filterMatches = 0;
 					if (!(filterEnchantmentNode.getValue() instanceof Map<?, ?>)) {
 						throw new LuaException(
-								"Enchantments filter must be a table of enchant information like: \n{enchantments = { \n	{name = \"minecraft:sharpness\"} \n	{name = \"minecraft:protection\" \n level = 1\n	}\n}}");
+							"Enchantments filter must be a table of enchant information like: \n{enchantments = { \n	{name = \"minecraft:sharpness\"} \n	{name = \"minecraft:protection\" \n level = 1\n	}\n}}");
 					}
 					@SuppressWarnings("unchecked")
 					Map<String, ?> filterEnchantmentEntry = (Map<String, ?>) (filterEnchantmentNode.getValue());
@@ -132,12 +135,12 @@ public class LuaUtil {
 						Integer itemEnchantmentLevel = (Integer) (itemEnchantmentEntry.get("level"));
 
 						if (!matchedItemEnchantments.contains(itemEnchantmentEntry)
-								&& (!CheckEnchantmentName || itemEnchantmentName.equals(filterEnchantmentName))
-								&& (!CheckEnchantmentDisplayName
-										|| (itemEnchantmentDisplayName.equals(filterEnchantmentDisplayName)))
-								&& (!CheckEnchantmentLevel
-										|| (itemEnchantmentLevel
-												.doubleValue()) == filterEnchantmentLevel)) {
+							&& (!CheckEnchantmentName || itemEnchantmentName.equals(filterEnchantmentName))
+							&& (!CheckEnchantmentDisplayName
+							|| (itemEnchantmentDisplayName.equals(filterEnchantmentDisplayName)))
+							&& (!CheckEnchantmentLevel
+							|| (itemEnchantmentLevel
+							.doubleValue()) == filterEnchantmentLevel)) {
 							matchedItemEnchantments.add(itemEnchantmentEntry); // one itemenchant per filter
 							filterMatches++;
 						}
@@ -152,5 +155,16 @@ public class LuaUtil {
 		}
 		return entry.count;
 
+	}
+
+	public static Map<Integer, Map<String, ?>> list(IItemHandler inventory) {
+		Map<Integer, Map<String, ?>> result = new HashMap<>();
+		var size = inventory.getSlots();
+		for (var i = 0; i < size; i++) {
+			var stack = inventory.getStackInSlot(i);
+			if (!stack.isEmpty()) result.put(i + 1, VanillaDetailRegistries.ITEM_STACK.getBasicDetails(stack));
+		}
+
+		return result;
 	}
 }

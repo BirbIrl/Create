@@ -107,6 +107,10 @@ public class StockTickerBlockEntity extends StockCheckingBlockEntity implements 
 		CatnipServices.NETWORK.sendToServer(new LogisticalStockRequestPacket(worldPosition));
 	}
 
+	public IItemHandler getReceivedPaymentsHandler() {
+		return receivedPayments;
+	}
+
 	public List<List<BigItemStack>> getClientStockSnapshot() {
 		return lastClientsideStockSnapshot;
 	}

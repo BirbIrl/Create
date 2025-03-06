@@ -4,9 +4,10 @@ import org.jetbrains.annotations.NotNull;
 
 import com.simibubi.create.content.logistics.stockTicker.StockTickerBlockEntity;
 import com.simibubi.create.content.logistics.BigItemStack;
-import com.simibubi.create.compat.computercraft.implementation.LuaUtil;
+import com.simibubi.create.compat.computercraft.implementation.ComputerUtil;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBehaviour.RequestType;
 import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -16,6 +17,8 @@ import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.detail.VanillaDetailRegistries;
+
+import org.jetbrains.annotations.Nullable;
 
 public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEntity> {
 
@@ -38,7 +41,7 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 		for (BigItemStack entry : blockEntity.getAccurateSummary().getStacks()) {
 			i++;
 			Map<String, Object> details = new HashMap<>(
-					VanillaDetailRegistries.ITEM_STACK.getBasicDetails(entry.stack));
+				VanillaDetailRegistries.ITEM_STACK.getBasicDetails(entry.stack));
 			details.put("count", entry.count);
 			result.put(i, details);
 		}
@@ -52,7 +55,7 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 		for (BigItemStack entry : blockEntity.getAccurateSummary().getStacks()) {
 			i++;
 			Map<String, Object> details = new HashMap<>(
-					VanillaDetailRegistries.ITEM_STACK.getDetails(entry.stack));
+				VanillaDetailRegistries.ITEM_STACK.getDetails(entry.stack));
 			details.put("count", entry.count);
 			result.put(i, details);
 		}
@@ -89,7 +92,7 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 		List<BigItemStack> validItems = new ArrayList<>();
 		int totalItemCount = 0;
 		for (BigItemStack entry : blockEntity.getAccurateSummary().getStacks()) {
-			if (LuaUtil.bigItemStackToLuaTableFilter(entry, filter) > 0) {
+			if (ComputerUtil.bigItemStackToLuaTableFilter(entry, filter) > 0) {
 				// limit the number of items pulled from the system equals to the requested
 				// count parameter
 				if (filter.containsKey("count")) {
@@ -128,10 +131,19 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 		return totalItemCount;
 	}
 
+	@LuaFunction(mainThread = true)
+	public Map<Integer, Map<String, ?>> listPaymentInventory() {
+		return ComputerUtil.list(blockEntity.getReceivedPaymentsHandler());
+	}
+
 	@NotNull
 	@Override
 	public String getType() {
 		return "Create_StockTicker";
 	}
 
+	@Override
+	public @Nullable Object getTarget() {
+		return blockEntity.getReceivedPaymentsHandler();
+	}
 }

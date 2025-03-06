@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.simibubi.create.content.logistics.redstoneRequester.RedstoneRequesterBlockEntity;
 import com.simibubi.create.content.logistics.BigItemStack;
-import com.simibubi.create.compat.computercraft.implementation.LuaUtil;
+import com.simibubi.create.compat.computercraft.implementation.ComputerUtil;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBehaviour.RequestType;
 import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
 import java.util.Map;
@@ -54,7 +54,7 @@ public class RedstoneRequesterPeripheral extends SyncedPeripheral<RedstoneReques
 		List<BigItemStack> validItems = new ArrayList<>();
 		int totalItemCount = 0;
 		for (BigItemStack entry : blockEntity.getAccurateSummary().getStacks()) {
-			if (LuaUtil.bigItemStackToLuaTableFilter(entry, filter) > 0) {
+			if (ComputerUtil.bigItemStackToLuaTableFilter(entry, filter) > 0) {
 				// limit the number of items pulled from the system equals to the requested
 				// count parameter
 				if (filter.containsKey("count")) {
