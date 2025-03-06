@@ -112,8 +112,8 @@ public class RedstoneRequesterPeripheral extends SyncedPeripheral<RedstoneReques
 			throw new LuaException("Cannot input more than 9 items");
 		}
 
-		for (Map.Entry<Object, Object> entry : items.entrySet()) {
-			Object obj = entry.getValue();
+		for (double i = 1; i <= 9; i++) {
+			Object obj = items.get(i);
 
 			if (!(obj instanceof Map)) {
 				throw new LuaException("Table expected for each item entry");
@@ -133,8 +133,8 @@ public class RedstoneRequesterPeripheral extends SyncedPeripheral<RedstoneReques
 			}
 		}
 
-		System.out.println(list);
 		this.blockEntity.encodedRequest = new PackageOrder(list);
+		this.blockEntity.encodedRequestContext = new PackageOrder(list);
 		System.out.println(arguments.getString(1));
 	}
 
