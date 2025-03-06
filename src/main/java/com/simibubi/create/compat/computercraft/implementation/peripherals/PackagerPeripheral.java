@@ -56,6 +56,7 @@ public class PackagerPeripheral extends SyncedPeripheral<PackagerBlockEntity> {
 		Object argument = arguments.get(0);
 		if (argument instanceof String) {
 			blockEntity.CustomComputerAddress = (String) argument;
+			blockEntity.signBasedAddress = (String) argument;
 			blockEntity.hasCustomComputerAddress = true;
 		} else if (argument == null) {
 			blockEntity.hasCustomComputerAddress = false;
