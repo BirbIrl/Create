@@ -1,16 +1,15 @@
 package com.simibubi.create.compat.computercraft.implementation;
 
-import com.simibubi.create.content.logistics.BigItemStack;
-
-import dan200.computercraft.api.lua.LuaException;
-
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.Map;
-import java.util.ArrayList;
+import java.util.Set;
+
+import com.simibubi.create.content.logistics.BigItemStack;
 
 import dan200.computercraft.api.detail.VanillaDetailRegistries;
+import dan200.computercraft.api.lua.LuaException;
 
 import net.neoforged.neoforge.items.IItemHandler;
 
@@ -21,7 +20,7 @@ public class ComputerUtil {
 	// api in other parts of the mod i must do this terribleness. i am sorry.
 	public static int bigItemStackToLuaTableFilter(BigItemStack entry, Map<?, ?> filter) throws LuaException {
 		Map<String, Object> details = new HashMap<>(
-			VanillaDetailRegistries.ITEM_STACK.getDetails(entry.stack));
+				VanillaDetailRegistries.ITEM_STACK.getDetails(entry.stack));
 		details.put("count", entry.count);
 		if (filter.containsKey("name"))
 			if (filter.get("name") instanceof String) {
