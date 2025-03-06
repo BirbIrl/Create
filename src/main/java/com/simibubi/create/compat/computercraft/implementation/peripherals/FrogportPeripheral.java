@@ -15,21 +15,24 @@ public class FrogportPeripheral extends SyncedPeripheral<FrogportBlockEntity> {
 	}
 
 	@LuaFunction(mainThread = true)
-	public final String setAddress(IArguments arguments) throws LuaException {
+	public final void setAddress(IArguments arguments) throws LuaException {
 		Object argument = arguments.get(0);
 		if (argument instanceof String) {
 			blockEntity.addressFilter = (String) argument;
 			blockEntity.filterChanged();
 			blockEntity.notifyUpdate();
-			return blockEntity.addressFilter;
+		} else if (argument == null) {
+			blockEntity.addressFilter = "";
+			blockEntity.filterChanged();
+			blockEntity.notifyUpdate();
 		} else {
-			return null;
+			throw new LuaException("Argument must be string or nil");
 		}
 	}
 
 	@LuaFunction(mainThread = true)
 	public final String getAddress() throws LuaException {
-			return blockEntity.addressFilter;
+		return blockEntity.addressFilter;
 	}
 
 	@NotNull
