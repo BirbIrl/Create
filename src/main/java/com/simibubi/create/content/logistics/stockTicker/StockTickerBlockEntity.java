@@ -111,6 +111,10 @@ public class StockTickerBlockEntity extends StockCheckingBlockEntity implements 
 			.sendToServer(new LogisticalStockRequestPacket(worldPosition));
 	}
 
+	public IItemHandler getReceivedPaymentsHandler() {
+		return receivedPayments;
+	}
+
 	public List<List<BigItemStack>> getClientStockSnapshot() {
 		return lastClientsideStockSnapshot;
 	}
