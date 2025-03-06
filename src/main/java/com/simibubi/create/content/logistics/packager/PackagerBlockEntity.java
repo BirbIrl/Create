@@ -98,7 +98,7 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 	public PackagerBlockEntity(BlockEntityType<?> typeIn, BlockPos pos, BlockState state) {
 		super(typeIn, pos, state);
 		redstonePowered = state.getOptionalValue(PackagerBlock.POWERED)
-			.orElse(false);
+				.orElse(false);
 		heldBox = ItemStack.EMPTY;
 		previouslyUnwrapped = ItemStack.EMPTY;
 		inventory = new PackagerItemHandler(this);
@@ -112,22 +112,21 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 
 	public static void registerCapabilities(RegisterCapabilitiesEvent event) {
 		event.registerBlockEntity(
-			Capabilities.ItemHandler.BLOCK,
-			AllBlockEntityTypes.PACKAGER.get(),
-			(be, context) -> be.inventory
-		);
+				Capabilities.ItemHandler.BLOCK,
+				AllBlockEntityTypes.PACKAGER.get(),
+				(be, context) -> be.inventory);
 		if (Mods.COMPUTERCRAFT.isLoaded()) {
 			event.registerBlockEntity(
-				PeripheralCapability.get(),
-				AllBlockEntityTypes.PACKAGER.get(),
-				(be, context) -> be.computerBehaviour.getPeripheralCapability());
+					PeripheralCapability.get(),
+					AllBlockEntityTypes.PACKAGER.get(),
+					(be, context) -> be.computerBehaviour.getPeripheralCapability());
 		}
 	}
 
 	@Override
 	public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
 		behaviours.add(targetInventory = new InvManipulationBehaviour(this, InterfaceProvider.oppositeOfBlockFacing())
-			.withFilter(this::supportsBlockEntity));
+				.withFilter(this::supportsBlockEntity));
 		behaviours.add(invVersionTracker = new VersionedInventoryTrackerBehaviour(this));
 		behaviours.add(advancements = new AdvancementBehaviour(this, AllAdvancements.PACKAGER));
 		behaviours.add(computerBehaviour = ComputerCraftProxy.behaviour(this));
@@ -168,7 +167,7 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 				AllSoundEvents.PACKAGER.playAt(level, worldPosition, 1, 1, true);
 			if (animationTicks == (animationInward ? 1 : 5))
 				level.playLocalSound(worldPosition, SoundEvents.IRON_TRAPDOOR_CLOSE, SoundSource.BLOCKS, 0.25f, 0.75f,
-					true);
+						true);
 		}
 
 		animationTicks--;
@@ -207,7 +206,8 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 
 		for (int slot = 0; slot < targetInv.getSlots(); slot++) {
 			int slotLimit = targetInv.getSlotLimit(slot);
-			availableItems.add(scanInputSlots ? targetInv.getStackInSlot(slot) : targetInv.extractItem(slot, slotLimit, true));
+			availableItems.add(
+					scanInputSlots ? targetInv.getStackInSlot(slot) : targetInv.extractItem(slot, slotLimit, true));
 		}
 
 		invVersionTracker.awaitNewVersion(targetInventory.getInventory());
@@ -273,7 +273,7 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 		if (!redstonePowered)
 			return;
 		redstonePowered = getBlockState().getOptionalValue(PackagerBlock.POWERED)
-			.orElse(false);
+				.orElse(false);
 		if (!redstoneModeActive())
 			return;
 		updateSignAddress();
@@ -295,7 +295,7 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 
 	public boolean redstoneModeActive() {
 		return !getBlockState().getOptionalValue(PackagerBlock.LINKED)
-			.orElse(false);
+				.orElse(false);
 	}
 
 	private BlockPos getLinkPos() {
@@ -325,9 +325,9 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 	public boolean isTooBusyFor(RequestType type) {
 		int queue = queuedExitingPackages.size();
 		return queue >= switch (type) {
-		case PLAYER -> 50;
-		case REDSTONE -> 20;
-		case RESTOCK -> 10;
+			case PLAYER -> 50;
+			case REDSTONE -> 20;
+			case RESTOCK -> 10;
 		};
 	}
 
@@ -353,10 +353,10 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 		ItemStackHandler contents = PackageItem.getContents(box);
 		PackageOrder orderContext = PackageItem.getOrderContext(box);
 		IItemHandler targetInv = targetInventory.getInventory();
-		BlockEntity targetBE =
-			level.getBlockEntity(worldPosition.relative(getBlockState().getOptionalValue(PackagerBlock.FACING)
-				.orElse(Direction.UP)
-				.getOpposite()));
+		BlockEntity targetBE = level
+				.getBlockEntity(worldPosition.relative(getBlockState().getOptionalValue(PackagerBlock.FACING)
+						.orElse(Direction.UP)
+						.getOpposite()));
 
 		if (targetInv == null)
 			return false;
@@ -381,9 +381,9 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 
 				// Follow crafting arrangement
 				if (targetIsCrafter && orderContext != null && orderContext.stacks()
-					.size() > slot) {
+						.size() > slot) {
 					BigItemStack targetStack = orderContext.stacks()
-						.get(slot);
+							.get(slot);
 					if (targetStack.stack.isEmpty())
 						break;
 					if (!ItemHandlerHelper.canItemStacksStack(toInsert, targetStack.stack))
@@ -391,7 +391,7 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 				}
 
 				if (targetInv.insertItem(slot, toInsert, true)
-					.getCount() == toInsert.getCount())
+						.getCount() == toInsert.getCount())
 					continue;
 
 				if (itemInSlot.isEmpty()) {
@@ -414,17 +414,17 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 					continue;
 
 				int insertedAmount = toInsert.getCount() - targetInv.insertItem(slot, toInsert, simulate)
-					.getCount();
+						.getCount();
 				int slotLimit = (int) ((targetInv.getStackInSlot(slot)
-					.isEmpty() ? itemInSlot.getMaxStackSize() / 64f : 1) * targetInv.getSlotLimit(slot));
-				int insertableAmountWithPreviousItems =
-					Math.min(toInsert.getCount(), slotLimit - itemInSlot.getCount() - itemsAddedToSlot);
+						.isEmpty() ? itemInSlot.getMaxStackSize() / 64f : 1) * targetInv.getSlotLimit(slot));
+				int insertableAmountWithPreviousItems = Math.min(toInsert.getCount(),
+						slotLimit - itemInSlot.getCount() - itemsAddedToSlot);
 
 				int added = Math.min(insertedAmount, Math.max(0, insertableAmountWithPreviousItems));
 				itemsAddedToSlot += added;
 
 				contents.setStackInSlot(boxSlot,
-					ItemHandlerHelper.copyStackWithSize(toInsert, toInsert.getCount() - added));
+						ItemHandlerHelper.copyStackWithSize(toInsert, toInsert.getCount() - added));
 			}
 		}
 
@@ -434,7 +434,7 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 		if (!targetIsCreativeCrate)
 			for (int boxSlot = 0; boxSlot < contents.getSlots(); boxSlot++)
 				if (!contents.getStackInSlot(boxSlot)
-					.isEmpty())
+						.isEmpty())
 					return false;
 
 		if (simulate)
@@ -479,9 +479,9 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 			fixedOrderId = nextRequest.orderId();
 			linkIndexInOrder = nextRequest.linkIndex();
 			finalLinkInOrder = nextRequest.finalLink()
-				.booleanValue();
+					.booleanValue();
 			packageIndexAtLink = nextRequest.packageCounter()
-				.getAndIncrement();
+					.getAndIncrement();
 			orderContext = nextRequest.context();
 		}
 
@@ -500,13 +500,13 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 						continue;
 
 					boolean bulky = !extracted.getItem()
-						.canFitInsideContainerItems();
+							.canFitInsideContainerItems();
 					if (bulky && anyItemPresent)
 						continue;
 
 					anyItemPresent = true;
 					int leftovers = ItemHandlerHelper.insertItemStacked(extractedItems, extracted.copy(), false)
-						.getCount();
+							.getCount();
 					int transferred = extracted.getCount() - leftovers;
 					targetInv.extractItem(slot, transferred, false);
 
@@ -532,7 +532,7 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 					if (queuedRequests.isEmpty())
 						break Outer;
 					int previousCount = nextRequest.packageCounter()
-						.intValue();
+							.intValue();
 					nextRequest = queuedRequests.get(0);
 					if (!fixedAddress.equals(nextRequest.address()))
 						break Outer;
@@ -540,7 +540,7 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 						break Outer;
 
 					nextRequest.packageCounter()
-						.setValue(previousCount);
+							.setValue(previousCount);
 					finalPackageAtLink = false;
 					continuePacking = true;
 					if (nextRequest.context() != null)
@@ -559,21 +559,21 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 			return;
 		}
 
-		ItemStack createdBox =
-			extractedPackageItem.isEmpty() ? PackageItem.containing(extractedItems) : extractedPackageItem.copy();
+		ItemStack createdBox = extractedPackageItem.isEmpty() ? PackageItem.containing(extractedItems)
+				: extractedPackageItem.copy();
 		PackageItem.clearAddress(createdBox);
 
 		if (fixedAddress != null)
 			PackageItem.addAddress(createdBox, fixedAddress);
 		if (requestQueue)
 			PackageItem.setOrder(createdBox, fixedOrderId, linkIndexInOrder, finalLinkInOrder, packageIndexAtLink,
-				finalPackageAtLink, orderContext);
+					finalPackageAtLink, orderContext);
 		if (!requestQueue && !signBasedAddress.isBlank())
 			PackageItem.addAddress(createdBox, signBasedAddress);
 
 		BlockPos linkPos = getLinkPos();
 		if (extractedPackageItem.isEmpty() && linkPos != null
-			&& level.getBlockEntity(linkPos) instanceof PackagerLinkBlockEntity plbe)
+				&& level.getBlockEntity(linkPos) instanceof PackagerLinkBlockEntity plbe)
 			plbe.behaviour.deductFromAccurateSummary(extractedItems);
 
 		if (!heldBox.isEmpty() || animationTicks != 0) {
@@ -600,6 +600,8 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 		}
 		if (computerBehaviour.hasAttachedComputer() && hasCustomComputerAddress) {
 			signBasedAddress = CustomComputerAddress;
+		} else {
+			hasCustomComputerAddress = false;
 		}
 	}
 
@@ -666,7 +668,7 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 		super.destroy();
 		ItemHelper.dropContents(level, worldPosition, inventory);
 		queuedExitingPackages.forEach(stack -> Containers.dropItemStack(level, worldPosition.getX(),
-			worldPosition.getY(), worldPosition.getZ(), stack));
+				worldPosition.getY(), worldPosition.getZ(), stack));
 		queuedExitingPackages.clear();
 	}
 
