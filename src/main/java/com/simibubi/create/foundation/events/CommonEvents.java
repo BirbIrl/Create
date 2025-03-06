@@ -13,6 +13,28 @@ import com.simibubi.create.content.equipment.zapper.ZapperItem;
 import com.simibubi.create.content.kinetics.belt.BeltHelper;
 import com.simibubi.create.content.kinetics.chainConveyor.ServerChainConveyorHandler;
 import com.simibubi.create.content.kinetics.drill.CobbleGenOptimisation;
+import com.simibubi.create.content.kinetics.gauge.SpeedGaugeBlockEntity;
+import com.simibubi.create.content.kinetics.gauge.StressGaugeBlockEntity;
+import com.simibubi.create.content.kinetics.millstone.MillstoneBlockEntity;
+import com.simibubi.create.content.kinetics.saw.SawBlockEntity;
+import com.simibubi.create.content.kinetics.speedController.SpeedControllerBlockEntity;
+import com.simibubi.create.content.kinetics.transmission.sequencer.SequencedGearshiftBlockEntity;
+import com.simibubi.create.content.logistics.chute.ChuteBlockEntity;
+import com.simibubi.create.content.logistics.chute.SmartChuteBlockEntity;
+import com.simibubi.create.content.logistics.crate.CreativeCrateBlockEntity;
+import com.simibubi.create.content.logistics.depot.DepotBlockEntity;
+import com.simibubi.create.content.logistics.depot.EjectorBlockEntity;
+import com.simibubi.create.content.logistics.packagePort.frogport.FrogportBlockEntity;
+import com.simibubi.create.content.logistics.packagePort.postbox.PostboxBlockEntity;
+import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
+import com.simibubi.create.content.logistics.packager.repackager.RepackagerBlockEntity;
+import com.simibubi.create.content.logistics.stockTicker.StockTickerBlockEntity;
+import com.simibubi.create.content.logistics.redstoneRequester.RedstoneRequesterBlockEntity;
+import com.simibubi.create.content.logistics.tunnel.BeltTunnelBlockEntity;
+import com.simibubi.create.content.logistics.tunnel.BrassTunnelBlockEntity;
+import com.simibubi.create.content.logistics.vault.ItemVaultBlockEntity;
+import com.simibubi.create.content.processing.basin.BasinBlockEntity;
+import com.simibubi.create.content.redstone.displayLink.DisplayLinkBlockEntity;
 import com.simibubi.create.content.redstone.link.controller.LinkedControllerServerHandler;
 import com.simibubi.create.content.trains.entity.CarriageEntityHandler;
 import com.simibubi.create.foundation.data.RuntimeDataGenerator;
@@ -215,6 +237,50 @@ public class CommonEvents {
 				RuntimeDataGenerator.insertIntoPack(dynamicPack);
 				event.addRepositorySource(new DynamicPackSource("create:dynamic_data", PackType.SERVER_DATA, Pack.Position.BOTTOM, dynamicPack));
 			}
+		}
+
+		@net.neoforged.bus.api.SubscribeEvent
+		public static void onRegisterMapDecorationRenderers(RegisterMapDecorationRenderersEvent event) {
+			event.register(AllMapDecorationTypes.STATION_MAP_DECORATION.value(), new StationMapDecorationRenderer());
+		}
+
+		@net.neoforged.bus.api.SubscribeEvent
+		public static void registerCapabilities(net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent event) {
+			ChuteBlockEntity.registerCapabilities(event);
+			SmartChuteBlockEntity.registerCapabilities(event);
+			BeltBlockEntity.registerCapabilities(event);
+			BasinBlockEntity.registerCapabilities(event);
+			BeltTunnelBlockEntity.registerCapabilities(event);
+			BrassTunnelBlockEntity.registerCapabilities(event);
+			CreativeCrateBlockEntity.registerCapabilities(event);
+			CrushingWheelControllerBlockEntity.registerCapabilities(event);
+			ToolboxBlockEntity.registerCapabilities(event);
+			DeployerBlockEntity.registerCapabilities(event);
+			DepotBlockEntity.registerCapabilities(event);
+			PortableFluidInterfaceBlockEntity.registerCapabilities(event);
+			SpoutBlockEntity.registerCapabilities(event);
+			PortableItemInterfaceBlockEntity.registerCapabilities(event);
+			SawBlockEntity.registerCapabilities(event);
+			EjectorBlockEntity.registerCapabilities(event);
+			FluidTankBlockEntity.registerCapabilities(event);
+			CreativeFluidTankBlockEntity.registerCapabilities(event);
+			HosePulleyBlockEntity.registerCapabilities(event);
+			ItemDrainBlockEntity.registerCapabilities(event);
+			ItemVaultBlockEntity.registerCapabilities(event);
+			MechanicalCrafterBlockEntity.registerCapabilities(event);
+			MillstoneBlockEntity.registerCapabilities(event);
+			StressGaugeBlockEntity.registerCapabilities(event);
+			SpeedGaugeBlockEntity.registerCapabilities(event);
+			StationBlockEntity.registerCapabilities(event);
+			SpeedControllerBlockEntity.registerCapabilities(event);
+			SequencedGearshiftBlockEntity.registerCapabilities(event);
+			DisplayLinkBlockEntity.registerCapabilities(event);
+			StockTickerBlockEntity.registerCapabilities(event);
+			RedstoneRequesterBlockEntity.registerCapabilities(event);
+			PackagerBlockEntity.registerCapabilities(event);
+			RepackagerBlockEntity.registerCapabilities(event);
+			PostboxBlockEntity.registerCapabilities(event);
+			FrogportBlockEntity.registerCapabilities(event);
 		}
 	}
 }
