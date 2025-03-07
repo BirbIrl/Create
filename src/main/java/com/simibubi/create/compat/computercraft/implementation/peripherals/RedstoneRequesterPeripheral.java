@@ -51,52 +51,8 @@ public class RedstoneRequesterPeripheral extends SyncedPeripheral<RedstoneReques
 	 * filter of {} requests all items from the network trollface.jpeg
 	 */
 	@LuaFunction(mainThread = true)
-	public final int request(IArguments arguments) throws LuaException {
-		if (!(arguments.get(0) instanceof Map<?, ?>))
-			return 0;
-		Map<?, ?> filter = (Map<?, ?>) arguments.get(0);
-		String address;
-		// Computercraft has forced my hand to make this dollar store filter algo
-		List<BigItemStack> validItems = new ArrayList<>();
-		int totalItemCount = 0;
-		for (BigItemStack entry : blockEntity.getAccurateSummary().getStacks()) {
-			if (ComputerUtil.bigItemStackToLuaTableFilter(entry, filter) > 0) {
-				// limit the number of items pulled from the system equals to the requested
-				// count parameter
-				if (filter.containsKey("count")) {
-					Object count = filter.get("count");
-					if (count instanceof Double) {
-						int maxCount = ((Double) count).intValue();
-						int remainingCount = maxCount - totalItemCount;
-
-						if (remainingCount > 0) {
-							int itemsToAdd = Math.min(remainingCount, entry.count);
-							entry.count = itemsToAdd;
-							totalItemCount += itemsToAdd;
-						} else
-							break;
-					}
-				} else {
-					totalItemCount += entry.count;
-				}
-				validItems.add(entry);
-			}
-		}
-		if (arguments.get(1) instanceof String)
-			address = arguments.getString(1);
-		else
-			address = "";
-
-		PackageOrder order = new PackageOrder(validItems);
-		blockEntity.broadcastPackageRequest(RequestType.RESTOCK, order, null, address);
-
-		/*
-		 * CatnipServices.NETWORK
-		 * .sendToServer(new PackageOrderRequestPacket(blockEntity.getBlockPos(), new
-		 * PackageOrder(itemsToOrder),
-		 * address, false, new PackageOrder(stacks);
-		 */
-		return totalItemCount;
+	public final void request() throws LuaException {
+		blockEntity.triggerRequest();
 	}
 
 	@LuaFunction(mainThread = true)
