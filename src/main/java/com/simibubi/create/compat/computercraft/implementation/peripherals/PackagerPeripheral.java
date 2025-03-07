@@ -9,9 +9,9 @@ import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
 import com.simibubi.create.content.logistics.BigItemStack;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import dan200.computercraft.api.lua.LuaFunction;
-import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.LuaException;
 import net.minecraft.world.item.ItemStack;
 import com.simibubi.create.content.logistics.box.PackageItem;
@@ -53,16 +53,13 @@ public class PackagerPeripheral extends SyncedPeripheral<PackagerBlockEntity> {
 	}
 
 	@LuaFunction(mainThread = true)
-	public final void setAddress(IArguments arguments) throws LuaException {
-		Object argument = arguments.get(0);
-		if (argument instanceof String) {
-			blockEntity.CustomComputerAddress = (String) argument;
-			blockEntity.signBasedAddress = (String) argument;
+	public final void setAddress(Optional<String> argument) throws LuaException {
+		if (argument.isPresent()) {
+			blockEntity.CustomComputerAddress = argument.get();
+			blockEntity.signBasedAddress = argument.get();
 			blockEntity.hasCustomComputerAddress = true;
-		} else if (argument == null) {
-			blockEntity.hasCustomComputerAddress = false;
 		} else {
-			throw new LuaException("Argument must be string or nil");
+			blockEntity.hasCustomComputerAddress = false;
 		}
 	}
 

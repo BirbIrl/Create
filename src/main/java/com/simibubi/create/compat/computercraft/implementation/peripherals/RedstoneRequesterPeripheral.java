@@ -10,11 +10,9 @@ import org.jetbrains.annotations.NotNull;
 
 import com.simibubi.create.content.logistics.redstoneRequester.RedstoneRequesterBlockEntity;
 import com.simibubi.create.content.logistics.BigItemStack;
-import com.simibubi.create.compat.computercraft.implementation.ComputerUtil;
-import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBehaviour.RequestType;
 import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
 import java.util.Map;
-import java.util.List;
+import java.util.Optional;
 import java.util.ArrayList;
 
 import dan200.computercraft.api.lua.LuaFunction;
@@ -77,7 +75,8 @@ public class RedstoneRequesterPeripheral extends SyncedPeripheral<RedstoneReques
 				if (itemData.get("count") instanceof Number) {
 					Object countObj = itemData.get("count");
 					count = (countObj instanceof Number) ? ((Number) countObj).intValue() : 1;
-					if(count > 256) throw new LuaException("Count for item " + itemName + " exceeds 256");
+					if (count > 256)
+						throw new LuaException("Count for item " + itemName + " exceeds 256");
 				}
 				ResourceLocation resourceLocation = ResourceLocation.tryParse(itemName);
 				ItemLike item = BuiltInRegistries.ITEM.get(resourceLocation);
@@ -91,14 +90,11 @@ public class RedstoneRequesterPeripheral extends SyncedPeripheral<RedstoneReques
 	}
 
 	@LuaFunction(mainThread = true)
-	public final void setAddress(IArguments arguments) throws LuaException {
-		Object argument = arguments.get(0);
-		if (argument instanceof String) {
-			blockEntity.encodedTargetAdress = (String) argument;
-		} else if (argument == null) {
-			blockEntity.encodedTargetAdress = "";
+	public final void setAddress(Optional<String> argument) throws LuaException {
+		if (argument.isPresent()) {
+			blockEntity.encodedTargetAdress = argument.get();
 		} else {
-			throw new LuaException("Argument must be string or nil");
+			blockEntity.encodedTargetAdress = "";
 		}
 		this.blockEntity.notifyUpdate();
 	}

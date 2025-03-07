@@ -1,12 +1,10 @@
 package com.simibubi.create.compat.computercraft.implementation.peripherals;
 
-import com.simibubi.create.content.logistics.packagePort.frogport.FrogportBlockEntity;
-
 import com.simibubi.create.content.logistics.packagePort.postbox.PostboxBlockEntity;
 
-import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.lua.LuaFunction;
+import java.util.Optional;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -17,18 +15,15 @@ public class PostboxPeripheral extends SyncedPeripheral<PostboxBlockEntity> {
 	}
 
 	@LuaFunction(mainThread = true)
-	public final void setAddress(IArguments arguments) throws LuaException {
-		Object argument = arguments.get(0);
-		if (argument instanceof String) {
-			blockEntity.addressFilter = (String) argument;
-			blockEntity.filterChanged();
-			blockEntity.notifyUpdate();
-		} else if (argument == null) {
-			blockEntity.addressFilter = "";
+	public final void setAddress(Optional<String> argument) throws LuaException {
+		if (argument.isPresent()) {
+			blockEntity.addressFilter = argument.get();
 			blockEntity.filterChanged();
 			blockEntity.notifyUpdate();
 		} else {
-			throw new LuaException("Argument must be string or nil");
+			blockEntity.addressFilter = "";
+			blockEntity.filterChanged();
+			blockEntity.notifyUpdate();
 		}
 	}
 
