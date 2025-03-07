@@ -2,23 +2,22 @@ package com.simibubi.create.content.logistics.redstoneRequester;
 
 import com.simibubi.create.AllPackets;
 import com.simibubi.create.AllSoundEvents;
-import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.content.logistics.BigItemStack;
 import com.simibubi.create.content.logistics.packager.InventorySummary;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBehaviour.RequestType;
 import com.simibubi.create.content.logistics.packagerLink.WiFiParticle;
 import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
 import com.simibubi.create.content.logistics.stockTicker.StockCheckingBlockEntity;
-import com.simibubi.create.compat.Mods;
 import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
 import com.simibubi.create.compat.computercraft.ComputerCraftProxy;
 import java.util.List;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 
-import dan200.computercraft.api.peripheral.PeripheralCapability;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.createmod.catnip.codecs.CatnipCodecUtils;
-import net.createmod.catnip.platform.CatnipServices;
+import net.minecraft.core.Direction;
+
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -34,6 +33,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.network.NetworkHooks;
+
+import org.jetbrains.annotations.NotNull;
 
 public class RedstoneRequesterBlockEntity extends StockCheckingBlockEntity implements MenuProvider {
 
@@ -59,13 +60,11 @@ public class RedstoneRequesterBlockEntity extends StockCheckingBlockEntity imple
 		behaviours.add(computerBehaviour = ComputerCraftProxy.behaviour(this));
 	}
 
-	public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-		if (Mods.COMPUTERCRAFT.isLoaded()) {
-			event.registerBlockEntity(
-					PeripheralCapability.get(),
-					AllBlockEntityTypes.REDSTONE_REQUESTER.get(),
-					(be, context) -> be.computerBehaviour.getPeripheralCapability());
-		}
+	@Override
+	public <T> @NotNull LazyOptional<T> getCapability(@NotNull Capability<T> cap, Direction side) {
+		if (computerBehaviour.isPeripheralCap(cap))
+			return computerBehaviour.getPeripheralCapability();
+		return super.getCapability(cap, side);
 	}
 
 	protected void onRedstonePowerChanged() {

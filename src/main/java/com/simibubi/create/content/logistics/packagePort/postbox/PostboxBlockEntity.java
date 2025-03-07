@@ -5,21 +5,19 @@ import java.util.List;
 
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.Create;
-import com.simibubi.create.compat.Mods;
 import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
 import com.simibubi.create.compat.computercraft.ComputerCraftProxy;
 import com.simibubi.create.content.logistics.packagePort.PackagePortBlockEntity;
 import com.simibubi.create.content.trains.station.GlobalStation;
 import com.simibubi.create.content.trains.station.GlobalStation.GlobalPackagePort;
 
-import com.simibubi.create.foundation.advancement.AdvancementBehaviour;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 
-import dan200.computercraft.api.peripheral.PeripheralCapability;
 import net.createmod.catnip.animation.LerpedFloat;
 import net.createmod.catnip.animation.LerpedFloat.Chaser;
 import net.createmod.catnip.nbt.NBTHelper;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -27,6 +25,11 @@ import net.minecraft.world.item.BoneMealItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
+
+import org.jetbrains.annotations.NotNull;
 
 public class PostboxBlockEntity extends PackagePortBlockEntity {
 
@@ -46,20 +49,11 @@ public class PostboxBlockEntity extends PackagePortBlockEntity {
 			.startWithValue(0);
 	}
 
-	public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-		event.registerBlockEntity(
-			Capabilities.ItemHandler.BLOCK,
-			AllBlockEntityTypes.PACKAGE_POSTBOX.get(),
-			(be, context) -> be.itemHandler
-		);
-
-		if (Mods.COMPUTERCRAFT.isLoaded()) {
-			event.registerBlockEntity(
-				PeripheralCapability.get(),
-				AllBlockEntityTypes.PACKAGE_POSTBOX.get(),
-				(be, context) -> be.computerBehaviour.getPeripheralCapability()
-			);
-		}
+	@Override
+	public <T> @NotNull LazyOptional<T> getCapability(@NotNull Capability<T> cap, Direction side) {
+		if (computerBehaviour.isPeripheralCap(cap))
+			return computerBehaviour.getPeripheralCapability();
+		return super.getCapability(cap, side);
 	}
 
 	@Override
@@ -143,7 +137,7 @@ public class PostboxBlockEntity extends PackagePortBlockEntity {
 	}
 
 	@Override
-	public void invalidate() {
+	public void invalidateCaps() {
 		super.invalidate();
 		computerBehaviour.removePeripheral();
 	}

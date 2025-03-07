@@ -6,15 +6,12 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.AllPackets;
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.AllTags.AllBlockTags;
-import com.simibubi.create.compat.Mods;
 import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
 import com.simibubi.create.compat.computercraft.ComputerCraftProxy;
-import com.simibubi.create.compat.computercraft.implementation.ComputerUtil;
 import com.simibubi.create.content.logistics.BigItemStack;
 import com.simibubi.create.content.logistics.packager.InventorySummary;
 import com.simibubi.create.content.logistics.redstoneRequester.AutoRequestData;
@@ -49,8 +46,10 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
+
+import org.jetbrains.annotations.NotNull;
 
 public class TableClothBlockEntity extends SmartBlockEntity {
 
@@ -81,25 +80,11 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 		behaviours.add(computerBehaviour = ComputerCraftProxy.behaviour(this));
 	}
 
-	public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-		event.registerBlockEntity(
-			Capabilities.ItemHandler.BLOCK,
-			AllBlockEntityTypes.TABLE_CLOTH.get(),
-			(be, context) -> {
-				if (be.isShop()) {
-					return ComputerUtil.NOOP_HANDLER;
-				}
-				return be.manuallyAddedItems;
-			}
-		);
-
-		if (Mods.COMPUTERCRAFT.isLoaded()) {
-			event.registerBlockEntity(
-				PeripheralCapability.get(),
-				AllBlockEntityTypes.TABLE_CLOTH.get(),
-				(be, context) -> be.computerBehaviour.getPeripheralCapability()
-			);
-		}
+	@Override
+	public <T> @NotNull LazyOptional<T> getCapability(@NotNull Capability<T> cap, Direction side) {
+		if (computerBehaviour.isPeripheralCap(cap))
+			return computerBehaviour.getPeripheralCapability();
+		return super.getCapability(cap, side);
 	}
 
 	public List<ItemStack> getItemsForRender() {

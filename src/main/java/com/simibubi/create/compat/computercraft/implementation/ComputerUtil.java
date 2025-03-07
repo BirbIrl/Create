@@ -12,7 +12,9 @@ import dan200.computercraft.api.detail.VanillaDetailRegistries;
 import dan200.computercraft.api.lua.LuaException;
 
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
+
+import net.minecraftforge.items.IItemHandler;
+
 import org.jetbrains.annotations.NotNull;
 
 public class ComputerUtil {

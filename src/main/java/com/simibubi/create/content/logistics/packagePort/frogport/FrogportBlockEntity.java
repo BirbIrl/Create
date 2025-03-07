@@ -5,7 +5,6 @@ import java.util.List;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.api.equipment.goggles.IHaveHoveringInformation;
-import com.simibubi.create.compat.Mods;
 import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
 import com.simibubi.create.compat.computercraft.ComputerCraftProxy;
 import com.simibubi.create.content.logistics.box.PackageItem;
@@ -18,7 +17,6 @@ import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour
 import com.simibubi.create.foundation.item.ItemHelper;
 import com.simibubi.create.foundation.item.TooltipHelper;
 
-import dan200.computercraft.api.peripheral.PeripheralCapability;
 import net.createmod.catnip.animation.LerpedFloat;
 import net.createmod.catnip.animation.LerpedFloat.Chaser;
 import net.createmod.catnip.data.Iterate;
@@ -41,9 +39,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
+
+import org.jetbrains.annotations.NotNull;
 
 public class FrogportBlockEntity extends PackagePortBlockEntity implements IHaveHoveringInformation {
 
@@ -79,20 +81,11 @@ public class FrogportBlockEntity extends PackagePortBlockEntity implements IHave
 		goggles = false;
 	}
 
-	public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-		event.registerBlockEntity(
-			Capabilities.ItemHandler.BLOCK,
-			AllBlockEntityTypes.PACKAGE_FROGPORT.get(),
-			(be, context) -> be.itemHandler
-		);
-
-		if (Mods.COMPUTERCRAFT.isLoaded()) {
-			event.registerBlockEntity(
-				PeripheralCapability.get(),
-				AllBlockEntityTypes.PACKAGE_FROGPORT.get(),
-				(be, context) -> be.computerBehaviour.getPeripheralCapability()
-			);
-		}
+	@Override
+	public <T> @NotNull LazyOptional<T> getCapability(@NotNull Capability<T> cap, Direction side) {
+		if (computerBehaviour.isPeripheralCap(cap))
+			return computerBehaviour.getPeripheralCapability();
+		return super.getCapability(cap, side);
 	}
 
 	@Override
@@ -401,7 +394,7 @@ public class FrogportBlockEntity extends PackagePortBlockEntity implements IHave
 	}
 
 	@Override
-	public void invalidate() {
+	public void invalidateCaps() {
 		super.invalidate();
 		computerBehaviour.removePeripheral();
 	}

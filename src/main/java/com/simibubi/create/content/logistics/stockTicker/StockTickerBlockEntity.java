@@ -13,7 +13,6 @@ import org.jetbrains.annotations.Nullable;
 
 import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.AllPackets;
-import com.simibubi.create.compat.Mods;
 import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
 import com.simibubi.create.compat.computercraft.ComputerCraftProxy;
 import com.simibubi.create.AllSoundEvents;
@@ -30,7 +29,6 @@ import com.simibubi.create.foundation.item.SmartInventory;
 import com.simibubi.create.foundation.utility.CreateLang;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 
-import dan200.computercraft.api.peripheral.PeripheralCapability;
 import net.createmod.catnip.data.Iterate;
 import net.createmod.catnip.nbt.NBTHelper;
 import net.minecraft.ChatFormatting;
@@ -88,21 +86,6 @@ public class StockTickerBlockEntity extends StockCheckingBlockEntity implements 
 		capability = LazyOptional.of(() -> receivedPayments);
 		categories = new ArrayList<>();
 		hiddenCategoriesByPlayer = new HashMap<>();
-	}
-
-	public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-		event.registerBlockEntity(
-			Capabilities.ItemHandler.BLOCK,
-			AllBlockEntityTypes.STOCK_TICKER.get(),
-			(be, context) -> be.receivedPayments
-		);
-
-		if (Mods.COMPUTERCRAFT.isLoaded()) {
-			event.registerBlockEntity(
-				PeripheralCapability.get(),
-				AllBlockEntityTypes.STOCK_TICKER.get(),
-				(be, context) -> be.computerBehaviour.getPeripheralCapability());
-		}
 	}
 
 	public void refreshClientStockSnapshot() {
@@ -273,6 +256,9 @@ public class StockTickerBlockEntity extends StockCheckingBlockEntity implements 
 	public <T> @NotNull LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
 		if (isItemHandlerCap(cap))
 			return capability.cast();
+		if (computerBehaviour.isPeripheralCap(cap))
+			return computerBehaviour.getPeripheralCapability();
+
 		return super.getCapability(cap, side);
 	}
 

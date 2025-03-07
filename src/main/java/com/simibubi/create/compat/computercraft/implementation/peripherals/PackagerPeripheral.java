@@ -1,5 +1,7 @@
 package com.simibubi.create.compat.computercraft.implementation.peripherals;
 
+import net.minecraftforge.items.ItemStackHandler;
+
 import org.jetbrains.annotations.NotNull;
 
 import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
@@ -12,7 +14,6 @@ import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.LuaException;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.ItemStackHandler;
 import com.simibubi.create.content.logistics.box.PackageItem;
 import dan200.computercraft.api.detail.VanillaDetailRegistries;
 
