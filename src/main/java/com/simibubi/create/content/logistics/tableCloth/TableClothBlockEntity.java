@@ -193,7 +193,7 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 		if (heldItem.isEmpty()) {
 			if (manuallyAddedItems.isEmpty())
 				return InteractionResult.SUCCESS;
-			player.setItemInHand(InteractionHand.MAIN_HAND, manuallyAddedItems.remove(manuallyAddedItems.size() - 1));
+			player.setItemInHand(InteractionHand.MAIN_HAND, popItem());
 			level.playSound(null, worldPosition, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 0.5f, 1f);
 			cachedItems = items();
 			if (manuallyAddedItems.isEmpty() && !computerBehaviour.hasAttachedComputer()) {
@@ -372,7 +372,7 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 	@Override
 	protected void write(CompoundTag tag, boolean clientPacket) {
 		super.write(tag, clientPacket);
-		tag.put("Items", NBTHelper.writeItemList(manuallyAddedItems));
+		tag.put("Items", NBTHelper.writeItemList(items()));
 		tag.putInt("Facing", facing.get2DDataValue());
 		requestData.write(tag);
 		if (owner != null)
