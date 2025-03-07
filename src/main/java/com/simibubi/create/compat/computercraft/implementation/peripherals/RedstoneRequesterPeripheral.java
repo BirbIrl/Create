@@ -99,45 +99,52 @@ public class RedstoneRequesterPeripheral extends SyncedPeripheral<RedstoneReques
 		return totalItemCount;
 	}
 
-
 	@LuaFunction(mainThread = true)
-	public final void configure(IArguments arguments) throws LuaException{
-		if (!(arguments.get(0) instanceof Map<?, ?>)) {
-			throw new LuaException("Argument Issue");
-		}
-		Map<Object, Object> items = (Map<Object, Object>) arguments.get(0);
+	public final void configure(IArguments arguments) throws LuaException {
+
 		ArrayList<BigItemStack> list = new ArrayList<>();
 
-		if(items.size() > 9){
-			throw new LuaException("Cannot input more than 9 items");
-		}
+		for (int i = 0; i <= 8; i++) {
+			Map<?, ?> itemData = arguments.getTable(i);
 
-		for (double i = 1; i <= 9; i++) {
-			Object obj = items.get(i);
-
-			if (!(obj instanceof Map)) {
-				throw new LuaException("Table expected for each item entry");
+			if (!(itemData instanceof Map)) {
+				throw new LuaException("Table or nil expected for each item entry");
 			}
-
-			Map<Object, Object> itemData = (Map<Object, Object>) obj;
-			String itemName = (String) itemData.getOrDefault("name", "minecraft:air");
-			Object countObj = itemData.getOrDefault("count", 1.0);
-			int count = (countObj instanceof Number) ? ((Number) countObj).intValue() : 1;
-			if (itemName.isEmpty()) {
-				list.add(new BigItemStack(ItemStack.EMPTY, count));
-			} else {
-				ResourceLocation resourceLocation = ResourceLocation.parse(itemName);
-				ItemLike item = BuiltInRegistries.ITEM.get(resourceLocation);
-				ItemStack itemStack = new ItemStack(item);
-				list.add(new BigItemStack(itemStack, count));
+			String itemName = "minecraft:air";
+			if (itemData.get("name") instanceof String) {
+				itemName = (String) itemData.get("name");
 			}
+			int count = 1;
+			if (itemData.get("count") instanceof Number) {
+				Object countObj = itemData.get("count");
+				count = (countObj instanceof Number) ? ((Number) countObj).intValue() : 1;
+			}
+			ResourceLocation resourceLocation = ResourceLocation.parse(itemName);
+			ItemLike item = BuiltInRegistries.ITEM.get(resourceLocation);
+			ItemStack itemStack = new ItemStack(item);
+			list.add(new BigItemStack(itemStack, 20));
 		}
 
 		this.blockEntity.encodedRequest = new PackageOrder(list);
 		this.blockEntity.encodedRequestContext = new PackageOrder(list);
-		System.out.println(arguments.getString(1));
 	}
 
+	@LuaFunction(mainThread = true)
+	public final void setAddress(IArguments arguments) throws LuaException {
+		Object argument = arguments.get(0);
+		if (argument instanceof String) {
+			blockEntity.encodedTargetAdress = (String) argument;
+		} else if (argument == null) {
+			blockEntity.encodedTargetAdress = "";
+		} else {
+			throw new LuaException("Argument must be string or nil");
+		}
+	}
+
+	@LuaFunction(mainThread = true)
+	public final String getAddress() throws LuaException {
+		return blockEntity.encodedTargetAdress;
+	}
 
 	@NotNull
 	@Override
