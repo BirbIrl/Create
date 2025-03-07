@@ -101,14 +101,27 @@ public class RedstoneRequesterPeripheral extends SyncedPeripheral<RedstoneReques
 
 	@LuaFunction(mainThread = true)
 	public final void configure(IArguments arguments) throws LuaException {
-
+		if (!(arguments.get(0) instanceof Map<?, ?> items)) {
+			throw new LuaException("First argument must be a table");
+		}
 		ArrayList<BigItemStack> list = new ArrayList<>();
-
-		for (int i = 0; i <= 8; i++) {
-			Map<?, ?> itemData = arguments.getTable(i);
-
-			if (!(itemData instanceof Map)) {
-				throw new LuaException("Table or nil expected for each item entry");
+		if (items.size() > 9) {
+			throw new LuaException("Cannot input more than 9 items");
+		}
+		for (int i = 0; i < 9; i++) {
+			list.add(new BigItemStack(ItemStack.EMPTY, 0));
+		}
+		for (Object key : items.keySet()) {
+			if (!(key instanceof Number)) {
+				continue;
+			}
+			int index = ((Number) key).intValue() - 1;
+			if (index < 0 || index >= 9) {
+				continue;
+			}
+			Object obj = items.get(key);
+			if (!(obj instanceof Map<?, ?> itemData)) {
+				throw new LuaException("Table expected for each item entry");
 			}
 			String itemName = "minecraft:air";
 			if (itemData.get("name") instanceof String) {
@@ -116,17 +129,21 @@ public class RedstoneRequesterPeripheral extends SyncedPeripheral<RedstoneReques
 			}
 			int count = 1;
 			if (itemData.get("count") instanceof Number) {
-				Object countObj = itemData.get("count");
-				count = (countObj instanceof Number) ? ((Number) countObj).intValue() : 1;
+				count = ((Number) itemData.get("count")).intValue();
 			}
-			ResourceLocation resourceLocation = ResourceLocation.parse(itemName);
-			ItemLike item = BuiltInRegistries.ITEM.get(resourceLocation);
-			ItemStack itemStack = new ItemStack(item);
-			list.add(new BigItemStack(itemStack, 20));
+			if (itemName.isEmpty() || "minecraft:air".equals(itemName)) {
+				list.set(index, new BigItemStack(ItemStack.EMPTY, count));
+			} else {
+				ResourceLocation resourceLocation = ResourceLocation.parse(itemName);
+				ItemLike item = BuiltInRegistries.ITEM.get(resourceLocation);
+				ItemStack itemStack = new ItemStack(item);
+				list.set(index, new BigItemStack(itemStack, count));
+			}
 		}
 
 		this.blockEntity.encodedRequest = new PackageOrder(list);
 		this.blockEntity.encodedRequestContext = new PackageOrder(list);
+		this.blockEntity.notifyUpdate();
 	}
 
 	@LuaFunction(mainThread = true)
