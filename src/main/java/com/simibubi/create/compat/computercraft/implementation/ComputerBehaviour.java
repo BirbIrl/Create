@@ -11,6 +11,7 @@ import com.simibubi.create.compat.computercraft.implementation.peripherals.Stati
 import com.simibubi.create.compat.computercraft.implementation.peripherals.StressGaugePeripheral;
 import com.simibubi.create.compat.computercraft.implementation.peripherals.StockTickerPeripheral;
 import com.simibubi.create.compat.computercraft.implementation.peripherals.PackagerPeripheral;
+import com.simibubi.create.compat.computercraft.implementation.peripherals.TableClothPeripheral;
 import com.simibubi.create.content.logistics.packagePort.frogport.FrogportBlockEntity;
 import com.simibubi.create.content.logistics.packagePort.postbox.PostboxBlockEntity;
 import com.simibubi.create.compat.computercraft.implementation.peripherals.RedstoneRequesterPeripheral;
@@ -21,6 +22,7 @@ import com.simibubi.create.content.kinetics.gauge.SpeedGaugeBlockEntity;
 import com.simibubi.create.content.kinetics.gauge.StressGaugeBlockEntity;
 import com.simibubi.create.content.kinetics.speedController.SpeedControllerBlockEntity;
 import com.simibubi.create.content.kinetics.transmission.sequencer.SequencedGearshiftBlockEntity;
+import com.simibubi.create.content.logistics.tableCloth.TableClothBlockEntity;
 import com.simibubi.create.content.redstone.displayLink.DisplayLinkBlockEntity;
 import com.simibubi.create.content.trains.station.StationBlockEntity;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
@@ -69,6 +71,8 @@ public class ComputerBehaviour extends AbstractComputerBehaviour {
 			return () -> new RedstoneRequesterPeripheral(rrbe);
 		if (be instanceof StationBlockEntity sbe)
 			return () -> new StationPeripheral(sbe);
+		if (be instanceof TableClothBlockEntity tcbe)
+			return () -> new TableClothPeripheral(tcbe);
 
 		throw new IllegalArgumentException(
 			"No peripheral available for " + ForgeRegistries.BLOCK_ENTITY_TYPES.getKey(be.getType()));

@@ -11,9 +11,43 @@ import com.simibubi.create.content.logistics.BigItemStack;
 import dan200.computercraft.api.detail.VanillaDetailRegistries;
 import dan200.computercraft.api.lua.LuaException;
 
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
+import org.jetbrains.annotations.NotNull;
 
 public class ComputerUtil {
+
+	public static IItemHandler NOOP_HANDLER = new IItemHandler() {
+		@Override
+		public int getSlots() {
+			return 0;
+		}
+
+		@Override
+		public @NotNull ItemStack getStackInSlot(int i) {
+			return ItemStack.EMPTY;
+		}
+
+		@Override
+		public @NotNull ItemStack insertItem(int i, ItemStack itemStack, boolean b) {
+			return ItemStack.EMPTY;
+		}
+
+		@Override
+		public @NotNull ItemStack extractItem(int i, int i1, boolean b) {
+			return ItemStack.EMPTY;
+		}
+
+		@Override
+		public int getSlotLimit(int i) {
+			return 0;
+		}
+
+		@Override
+		public boolean isItemValid(int i, @NotNull ItemStack itemStack) {
+			return false;
+		}
+	};
 
 	// tldr: the computercraft api lets you parse items into lua-like-tables that cc
 	// uses for all it's items. to keep consistency with the rest of the inventory

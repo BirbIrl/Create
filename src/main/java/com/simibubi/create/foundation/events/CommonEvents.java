@@ -30,6 +30,7 @@ import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
 import com.simibubi.create.content.logistics.packager.repackager.RepackagerBlockEntity;
 import com.simibubi.create.content.logistics.stockTicker.StockTickerBlockEntity;
 import com.simibubi.create.content.logistics.redstoneRequester.RedstoneRequesterBlockEntity;
+import com.simibubi.create.content.logistics.tableCloth.TableClothBlockEntity;
 import com.simibubi.create.content.logistics.tunnel.BeltTunnelBlockEntity;
 import com.simibubi.create.content.logistics.tunnel.BrassTunnelBlockEntity;
 import com.simibubi.create.content.logistics.vault.ItemVaultBlockEntity;
@@ -281,6 +282,7 @@ public class CommonEvents {
 			RepackagerBlockEntity.registerCapabilities(event);
 			PostboxBlockEntity.registerCapabilities(event);
 			FrogportBlockEntity.registerCapabilities(event);
+			TableClothBlockEntity.registerCapabilities(event);
 		}
 	}
 }
