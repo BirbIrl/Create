@@ -93,39 +93,42 @@ public class TableClothPeripheral extends SyncedPeripheral<TableClothBlockEntity
 	 * visually update the store's wares without reloading the chunk. The render
 	 * pipeline is difficult :(
 	 *
-	 * @LuaFunction(mainThread = true)
-	 * public final void setWares(IArguments arguments) throws LuaException {
-	 * if (!blockEntity.manuallyAddedItems.isEmpty())
-	 * throw new LuaException("Tablecloth isn't empty.");
-	 * ArrayList<BigItemStack> list = new ArrayList<>();
-	 * for (int i = 0; i <= 8; i++) {
-	 * if (arguments.get(i) != null) {
-	 * Map<?, ?> itemData = arguments.getTable(i);
-	 *
-	 * if (!(itemData instanceof Map)) {
-	 * throw new LuaException("Table or nil expected for each item entry");
-	 * }
-	 * String itemName = "minecraft:air";
-	 * if (itemData.get("name") instanceof String) {
-	 * itemName = (String) itemData.get("name");
-	 * }
-	 * int count = 1;
-	 * if (itemData.get("count") instanceof Number) {
-	 * Object countObj = itemData.get("count");
-	 * count = (countObj instanceof Number) ? ((Number) countObj).intValue() : 1;
-	 * if (count > 256)
-	 * throw new LuaException("Count for item " + itemName + " exceeds 256");
-	 * }
-	 * ResourceLocation resourceLocation = ResourceLocation.tryParse(itemName);
-	 * ItemLike item = BuiltInRegistries.ITEM.get(resourceLocation);
-	 * list.add(new BigItemStack(new ItemStack(item), count));
-	 * }
-	 * }
-	 * blockEntity.requestData.encodedRequest = new PackageOrder(list);
-	 * blockEntity.requestData.encodedRequestContext = new PackageOrder(list);
-	 * blockEntity.notifyUpdate();
-	 * }
+	 * update: I got it working by sending a RemoveBlockEntityPacket.
+	 * Do not ask why it works, this is black magic.
 	 */
+	@LuaFunction(mainThread = true)
+	public final void setWares(IArguments arguments) throws LuaException {
+		if (!blockEntity.manuallyAddedItems.isEmpty())
+			throw new LuaException("Tablecloth isn't empty.");
+		ArrayList<BigItemStack> list = new ArrayList<>();
+		for (int i = 0; i <= 8; i++) {
+			if (arguments.get(i) != null) {
+				Map<?, ?> itemData = arguments.getTable(i);
+
+				if (!(itemData instanceof Map)) {
+					throw new LuaException("Table or nil expected for each item entry");
+				}
+				String itemName = "minecraft:air";
+				if (itemData.get("name") instanceof String) {
+					itemName = (String) itemData.get("name");
+				}
+				int count = 1;
+				if (itemData.get("count") instanceof Number) {
+					Object countObj = itemData.get("count");
+					count = (countObj instanceof Number) ? ((Number) countObj).intValue() : 1;
+					if (count > 256)
+						throw new LuaException("Count for item " + itemName + " exceeds 256");
+				}
+				ResourceLocation resourceLocation = ResourceLocation.tryParse(itemName);
+				ItemLike item = BuiltInRegistries.ITEM.get(resourceLocation);
+				list.add(new BigItemStack(new ItemStack(item), count));
+				blockEntity.updateShopRender();
+			}
+		}
+		blockEntity.requestData.encodedRequest = new PackageOrder(list);
+		blockEntity.requestData.encodedRequestContext = new PackageOrder(list);
+		blockEntity.notifyUpdate();
+	}
 
 	@Override
 	public String getType() {

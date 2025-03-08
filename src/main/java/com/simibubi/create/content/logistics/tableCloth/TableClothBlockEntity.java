@@ -100,6 +100,10 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 		return cachedItems();
 	}
 
+	public void updateShopRender() {
+		AllPackets.getChannel().send(packetTarget(), new RemoveBlockEntityPacket(worldPosition));
+	}
+
 	@Override
 	public void lazyTick() {
 		super.lazyTick();
