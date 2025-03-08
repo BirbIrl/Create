@@ -51,13 +51,12 @@ public class TableClothPeripheral extends SyncedPeripheral<TableClothBlockEntity
 	}
 
 	@LuaFunction(mainThread = true)
-	public final boolean setPriceTagItem(Optional<String> itemName) throws LuaException {
+	public final void setPriceTagItem(Optional<String> itemName) throws LuaException {
 		ResourceLocation resourceLocation = ResourceLocation.tryParse("minecraft:air");
 		if (itemName.isPresent())
 			resourceLocation = ResourceLocation.tryParse(itemName.get());
 		ItemLike item = BuiltInRegistries.ITEM.get(resourceLocation);
 		blockEntity.priceTag.setFilter(new ItemStack(item));
-		return true;
 	}
 
 	@LuaFunction(mainThread = true)
