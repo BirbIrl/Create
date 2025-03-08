@@ -1,6 +1,8 @@
 package com.simibubi.create.content.logistics.redstoneRequester;
 
+import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.AllSoundEvents;
+import com.simibubi.create.compat.Mods;
 import com.simibubi.create.content.logistics.BigItemStack;
 import com.simibubi.create.content.logistics.packager.InventorySummary;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBehaviour.RequestType;
@@ -12,10 +14,7 @@ import com.simibubi.create.compat.computercraft.ComputerCraftProxy;
 import java.util.List;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 
-import net.minecraft.core.Direction;
-
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
+import dan200.computercraft.api.peripheral.PeripheralCapability;
 
 import net.createmod.catnip.codecs.CatnipCodecUtils;
 import net.createmod.catnip.platform.CatnipServices;
@@ -34,9 +33,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.util.FakePlayer;
-
-import org.jetbrains.annotations.NotNull;
 
 public class RedstoneRequesterBlockEntity extends StockCheckingBlockEntity implements MenuProvider {
 
@@ -56,17 +54,20 @@ public class RedstoneRequesterBlockEntity extends StockCheckingBlockEntity imple
 
 	public AbstractComputerBehaviour computerBehaviour;
 
+	public static void registerCapabilities(RegisterCapabilitiesEvent event) {
+		if (Mods.COMPUTERCRAFT.isLoaded()) {
+			event.registerBlockEntity(
+				PeripheralCapability.get(),
+				AllBlockEntityTypes.REDSTONE_REQUESTER.get(),
+				(be, context) -> be.computerBehaviour.getPeripheralCapability()
+			);
+		}
+	}
+
 	@Override
 	public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
 		super.addBehaviours(behaviours);
 		behaviours.add(computerBehaviour = ComputerCraftProxy.behaviour(this));
-	}
-
-	@Override
-	public <T> @NotNull LazyOptional<T> getCapability(@NotNull Capability<T> cap, Direction side) {
-		if (computerBehaviour.isPeripheralCap(cap))
-			return computerBehaviour.getPeripheralCapability();
-		return super.getCapability(cap, side);
 	}
 
 	protected void onRedstonePowerChanged() {
@@ -178,4 +179,9 @@ public class RedstoneRequesterBlockEntity extends StockCheckingBlockEntity imple
 		}
 	}
 
+	@Override
+	public void invalidate() {
+		super.invalidate();
+		computerBehaviour.removePeripheral();
+	}
 }

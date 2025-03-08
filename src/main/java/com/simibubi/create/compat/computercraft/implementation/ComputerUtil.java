@@ -13,7 +13,7 @@ import dan200.computercraft.api.lua.LuaException;
 
 import net.minecraft.world.item.ItemStack;
 
-import net.minecraftforge.items.IItemHandler;
+import net.neoforged.neoforge.items.IItemHandler;
 
 import org.jetbrains.annotations.NotNull;
 

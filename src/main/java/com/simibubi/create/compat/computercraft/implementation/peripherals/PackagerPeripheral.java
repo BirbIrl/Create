@@ -1,6 +1,6 @@
 package com.simibubi.create.compat.computercraft.implementation.peripherals;
 
-import net.minecraftforge.items.ItemStackHandler;
+import net.neoforged.neoforge.items.ItemStackHandler;
 
 import org.jetbrains.annotations.NotNull;
 

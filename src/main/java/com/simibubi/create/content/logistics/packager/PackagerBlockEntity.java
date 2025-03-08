@@ -10,6 +10,7 @@ import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.Create;
+import com.simibubi.create.compat.Mods;
 import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
 import com.simibubi.create.compat.computercraft.ComputerCraftProxy;
 import com.simibubi.create.content.contraptions.actors.psi.PortableStorageInterfaceBlockEntity;
@@ -37,6 +38,7 @@ import com.simibubi.create.foundation.blockEntity.behaviour.inventory.InvManipul
 import com.simibubi.create.foundation.blockEntity.behaviour.inventory.VersionedInventoryTrackerBehaviour;
 import com.simibubi.create.foundation.item.ItemHelper;
 
+import dan200.computercraft.api.peripheral.PeripheralCapability;
 import net.createmod.catnip.codecs.CatnipCodecUtils;
 import net.createmod.catnip.data.Iterate;
 import net.createmod.catnip.nbt.NBTHelper;
@@ -112,6 +114,14 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 			AllBlockEntityTypes.PACKAGER.get(),
 			(be, context) -> be.inventory
 		);
+
+		if (Mods.COMPUTERCRAFT.isLoaded()) {
+			event.registerBlockEntity(
+				PeripheralCapability.get(),
+				AllBlockEntityTypes.PACKAGER.get(),
+				(be, context) -> be.computerBehaviour.getPeripheralCapability()
+			);
+		}
 	}
 
 	@Override
@@ -690,6 +700,12 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 		}
 
 		return false;
+	}
+
+	@Override
+	public void invalidate() {
+		super.invalidate();
+		computerBehaviour.removePeripheral();
 	}
 
 }

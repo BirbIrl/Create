@@ -11,6 +11,7 @@ import java.util.stream.IntStream;
 import javax.annotation.Nullable;
 
 import com.simibubi.create.AllBlockEntityTypes;
+import com.simibubi.create.compat.Mods;
 import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
 import com.simibubi.create.compat.computercraft.ComputerCraftProxy;
 import com.simibubi.create.AllSoundEvents;
@@ -27,6 +28,7 @@ import com.simibubi.create.foundation.item.SmartInventory;
 import com.simibubi.create.foundation.utility.CreateLang;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 
+import dan200.computercraft.api.peripheral.PeripheralCapability;
 import net.createmod.catnip.data.Iterate;
 import net.createmod.catnip.nbt.NBTHelper;
 import net.createmod.catnip.platform.CatnipServices;
@@ -91,6 +93,14 @@ public class StockTickerBlockEntity extends StockCheckingBlockEntity implements 
 			AllBlockEntityTypes.STOCK_TICKER.get(),
 			(be, context) -> be.receivedPayments
 		);
+
+		if (Mods.COMPUTERCRAFT.isLoaded()) {
+			event.registerBlockEntity(
+				PeripheralCapability.get(),
+				AllBlockEntityTypes.STOCK_TICKER.get(),
+				(be, context) -> be.computerBehaviour.getPeripheralCapability()
+			);
+		}
 	}
 
 	public void refreshClientStockSnapshot() {
@@ -298,6 +308,12 @@ public class StockTickerBlockEntity extends StockCheckingBlockEntity implements 
 			return Component.empty();
 		}
 
+	}
+
+	@Override
+	public void invalidate() {
+		super.invalidate();
+		computerBehaviour.removePeripheral();
 	}
 
 }
