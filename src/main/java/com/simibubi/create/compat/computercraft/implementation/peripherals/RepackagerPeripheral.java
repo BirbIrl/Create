@@ -31,6 +31,16 @@ public class RepackagerPeripheral extends SyncedPeripheral<RepackagerBlockEntity
 		return blockEntity.signBasedAddress;
 	}
 
+	@LuaFunction(mainThread = true)
+	public final boolean makePackage() {
+		if (!blockEntity.heldBox.isEmpty())
+			return false;
+		blockEntity.activate();
+		if (blockEntity.heldBox.isEmpty())
+			return false;
+		return true;
+	}
+
 	@NotNull
 	@Override
 	public String getType() {
