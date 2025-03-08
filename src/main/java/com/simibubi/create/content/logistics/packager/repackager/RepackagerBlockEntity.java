@@ -3,6 +3,7 @@ package com.simibubi.create.content.logistics.packager.repackager;
 import java.util.List;
 
 import com.simibubi.create.AllBlockEntityTypes;
+import com.simibubi.create.compat.Mods;
 import com.simibubi.create.content.logistics.box.PackageItem;
 import com.simibubi.create.content.logistics.crate.BottomlessItemHandler;
 import com.simibubi.create.content.logistics.packager.PackageDefragmenter;
@@ -10,6 +11,7 @@ import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
 import com.simibubi.create.content.logistics.packager.PackagerItemHandler;
 import com.simibubi.create.content.logistics.packager.PackagingRequest;
 
+import dan200.computercraft.api.peripheral.PeripheralCapability;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -134,13 +136,21 @@ public class RepackagerBlockEntity extends PackagerBlockEntity {
 
 		notifyUpdate();
 	}
-	
+
 	public static void registerCapabilities(RegisterCapabilitiesEvent event) {
 		event.registerBlockEntity(
 			Capabilities.ItemHandler.BLOCK,
 			AllBlockEntityTypes.REPACKAGER.get(),
 			(be, context) -> be.inventory
 		);
+
+		if (Mods.COMPUTERCRAFT.isLoaded()) {
+			event.registerBlockEntity(
+				PeripheralCapability.get(),
+				AllBlockEntityTypes.REPACKAGER.get(),
+				(be, context) -> be.computerBehaviour.getPeripheralCapability()
+			);
+		}
 	}
 
 }
