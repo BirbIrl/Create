@@ -4,6 +4,7 @@ import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
 import com.simibubi.create.compat.computercraft.implementation.peripherals.DisplayLinkPeripheral;
 import com.simibubi.create.compat.computercraft.implementation.peripherals.FrogportPeripheral;
 import com.simibubi.create.compat.computercraft.implementation.peripherals.PostboxPeripheral;
+import com.simibubi.create.compat.computercraft.implementation.peripherals.RepackagerPeripheral;
 import com.simibubi.create.compat.computercraft.implementation.peripherals.SequencedGearshiftPeripheral;
 import com.simibubi.create.compat.computercraft.implementation.peripherals.SpeedControllerPeripheral;
 import com.simibubi.create.compat.computercraft.implementation.peripherals.SpeedGaugePeripheral;
@@ -15,6 +16,7 @@ import com.simibubi.create.compat.computercraft.implementation.peripherals.Table
 import com.simibubi.create.content.logistics.packagePort.frogport.FrogportBlockEntity;
 import com.simibubi.create.content.logistics.packagePort.postbox.PostboxBlockEntity;
 import com.simibubi.create.compat.computercraft.implementation.peripherals.RedstoneRequesterPeripheral;
+import com.simibubi.create.content.logistics.packager.repackager.RepackagerBlockEntity;
 import com.simibubi.create.content.logistics.redstoneRequester.RedstoneRequesterBlockEntity;
 import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
 import com.simibubi.create.content.logistics.stockTicker.StockTickerBlockEntity;
@@ -66,7 +68,11 @@ public class ComputerBehaviour extends AbstractComputerBehaviour {
 		if (be instanceof StockTickerBlockEntity sgbe)
 			return () -> new StockTickerPeripheral(sgbe);
 		if (be instanceof PackagerBlockEntity pgbe)
-			return () -> new PackagerPeripheral(pgbe);
+			if (!(be instanceof RepackagerBlockEntity)){ // I really hate this, but I did not find any other way
+				return () -> new PackagerPeripheral(pgbe);
+			}
+		if (be instanceof RepackagerBlockEntity rpbe)
+			return () -> new RepackagerPeripheral(rpbe);
 		if (be instanceof RedstoneRequesterBlockEntity rrbe)
 			return () -> new RedstoneRequesterPeripheral(rrbe);
 		if (be instanceof StationBlockEntity sbe)
