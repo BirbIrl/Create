@@ -11,6 +11,8 @@ import java.util.stream.IntStream;
 import javax.annotation.Nullable;
 
 import com.simibubi.create.AllBlockEntityTypes;
+import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
+import com.simibubi.create.compat.computercraft.ComputerCraftProxy;
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.api.equipment.goggles.IHaveHoveringInformation;
 import com.simibubi.create.content.contraptions.actors.seat.SeatEntity;
@@ -23,6 +25,7 @@ import com.simibubi.create.content.logistics.packagerLink.WiFiParticle;
 import com.simibubi.create.foundation.item.ItemHelper;
 import com.simibubi.create.foundation.item.SmartInventory;
 import com.simibubi.create.foundation.utility.CreateLang;
+import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 
 import net.createmod.catnip.data.Iterate;
 import net.createmod.catnip.nbt.NBTHelper;
@@ -52,6 +55,14 @@ import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.items.IItemHandler;
 
 public class StockTickerBlockEntity extends StockCheckingBlockEntity implements IHaveHoveringInformation {
+
+	public AbstractComputerBehaviour computerBehaviour;
+
+	@Override
+	public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
+		super.addBehaviours(behaviours);
+		behaviours.add(computerBehaviour = ComputerCraftProxy.behaviour(this));
+	}
 
 	// Player-interface Feature
 	protected List<List<BigItemStack>> lastClientsideStockSnapshot;
@@ -85,6 +96,10 @@ public class StockTickerBlockEntity extends StockCheckingBlockEntity implements 
 	public void refreshClientStockSnapshot() {
 		ticksSinceLastUpdate = 0;
 		CatnipServices.NETWORK.sendToServer(new LogisticalStockRequestPacket(worldPosition));
+	}
+
+	public IItemHandler getReceivedPaymentsHandler() {
+		return receivedPayments;
 	}
 
 	public List<List<BigItemStack>> getClientStockSnapshot() {

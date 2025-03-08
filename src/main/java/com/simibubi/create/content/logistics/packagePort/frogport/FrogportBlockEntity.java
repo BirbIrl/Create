@@ -6,6 +6,8 @@ import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.api.equipment.goggles.IHaveHoveringInformation;
+import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
+import com.simibubi.create.compat.computercraft.ComputerCraftProxy;
 import com.simibubi.create.content.logistics.box.PackageItem;
 import com.simibubi.create.content.logistics.box.PackageStyles;
 import com.simibubi.create.content.logistics.packagePort.PackagePortBlockEntity;
@@ -66,6 +68,8 @@ public class FrogportBlockEntity extends PackagePortBlockEntity implements IHave
 
 	private AdvancementBehaviour advancements;
 
+	public AbstractComputerBehaviour computerBehaviour;
+
 	public FrogportBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
 		super(type, pos, state);
 		sounds = new FrogportSounds();
@@ -88,6 +92,7 @@ public class FrogportBlockEntity extends PackagePortBlockEntity implements IHave
 	@Override
 	public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
 		behaviours.add(advancements = new AdvancementBehaviour(this, AllAdvancements.FROGPORT));
+		behaviours.add(computerBehaviour = ComputerCraftProxy.behaviour(this));
 		super.addBehaviours(behaviours);
 	}
 

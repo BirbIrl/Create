@@ -10,6 +10,8 @@ import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.Create;
+import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
+import com.simibubi.create.compat.computercraft.ComputerCraftProxy;
 import com.simibubi.create.content.contraptions.actors.psi.PortableStorageInterfaceBlockEntity;
 import com.simibubi.create.content.kinetics.crafter.MechanicalCrafterBlockEntity;
 import com.simibubi.create.content.logistics.BigItemStack;
@@ -79,6 +81,10 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 	public int animationTicks;
 	public boolean animationInward;
 
+	public AbstractComputerBehaviour computerBehaviour;
+	public Boolean hasCustomComputerAddress = false;
+	public String CustomComputerAddress = "";
+
 	private InventorySummary availableItems;
 	private VersionedInventoryTrackerBehaviour invVersionTracker;
 
@@ -114,6 +120,7 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 			.withFilter(this::supportsBlockEntity));
 		behaviours.add(invVersionTracker = new VersionedInventoryTrackerBehaviour(this));
 		behaviours.add(advancements = new AdvancementBehaviour(this, AllAdvancements.PACKAGER));
+		behaviours.add(computerBehaviour = ComputerCraftProxy.behaviour(this));
 	}
 
 	private boolean supportsBlockEntity(BlockEntity target) {
@@ -406,7 +413,7 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 				itemsAddedToSlot += added;
 
 				contents.setStackInSlot(boxSlot,
-					toInsert.copyWithCount(toInsert.getCount() - added));
+						toInsert.copyWithCount(toInsert.getCount() - added));
 				}
 			}
 
@@ -579,6 +586,11 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 			if (address == null || address.isBlank())
 				continue;
 			signBasedAddress = address;
+		}
+		if (computerBehaviour.hasAttachedComputer() && hasCustomComputerAddress) {
+			signBasedAddress = CustomComputerAddress;
+		} else {
+			hasCustomComputerAddress = false;
 		}
 	}
 
