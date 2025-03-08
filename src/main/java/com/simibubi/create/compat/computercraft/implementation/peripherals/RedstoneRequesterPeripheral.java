@@ -28,26 +28,6 @@ public class RedstoneRequesterPeripheral extends SyncedPeripheral<RedstoneReques
 		// this.targetSpeed = targetSpeed;
 	}
 
-	/*
-	 * for every item in the netowrk, this will compare that item to the CC args
-	 * filter, a table that looks something like this:
-	 * {
-	 * name = "minecraft:jungle_log",
-	 * tags = {
-	 * ["minecraft:logs"] = true
-	 * },
-	 * count = 5
-	 * },
-	 * and the second optional String arg which is the address:
-	 * "home_address"
-	 * (default value "")
-	 *
-	 * It then adds items that match the name if provided, nbt if provided, have all
-	 * of the tags if provided, has all the enchants if provided and
-	 * stops looking after adding items equal to count or finishing
-	 * going through the summary.
-	 * filter of {} requests all items from the network trollface.jpeg
-	 */
 	@LuaFunction(mainThread = true)
 	public final void request() throws LuaException {
 		blockEntity.triggerRequest();

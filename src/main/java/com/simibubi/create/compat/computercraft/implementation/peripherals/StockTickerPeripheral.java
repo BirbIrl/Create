@@ -41,7 +41,7 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 		for (BigItemStack entry : blockEntity.getAccurateSummary().getStacks()) {
 			i++;
 			Map<String, Object> details = new HashMap<>(
-				VanillaDetailRegistries.ITEM_STACK.getBasicDetails(entry.stack));
+					VanillaDetailRegistries.ITEM_STACK.getBasicDetails(entry.stack));
 			details.put("count", entry.count);
 			result.put(i, details);
 		}
@@ -55,7 +55,7 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 		for (BigItemStack entry : blockEntity.getAccurateSummary().getStacks()) {
 			i++;
 			Map<String, Object> details = new HashMap<>(
-				VanillaDetailRegistries.ITEM_STACK.getDetails(entry.stack));
+					VanillaDetailRegistries.ITEM_STACK.getDetails(entry.stack));
 			details.put("count", entry.count);
 			result.put(i, details);
 		}
@@ -83,7 +83,7 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 	 * filter of {} requests all items from the network trollface.jpeg
 	 */
 	@LuaFunction(mainThread = true)
-	public final int request(IArguments arguments) throws LuaException {
+	public final int requestFiltered(IArguments arguments) throws LuaException {
 		if (!(arguments.get(0) instanceof Map<?, ?>))
 			return 0;
 		Map<?, ?> filter = (Map<?, ?>) arguments.get(0);
