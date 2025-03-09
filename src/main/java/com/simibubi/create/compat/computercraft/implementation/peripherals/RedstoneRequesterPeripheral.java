@@ -11,10 +11,14 @@ import org.jetbrains.annotations.NotNull;
 import com.simibubi.create.content.logistics.redstoneRequester.RedstoneRequesterBlockEntity;
 import com.simibubi.create.content.logistics.BigItemStack;
 import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
+
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ArrayList;
 
+import dan200.computercraft.api.detail.VanillaDetailRegistries;
 import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.LuaException;
@@ -82,6 +86,24 @@ public class RedstoneRequesterPeripheral extends SyncedPeripheral<RedstoneReques
 	@LuaFunction(mainThread = true)
 	public final String getAddress() throws LuaException {
 		return blockEntity.encodedTargetAdress;
+	}
+
+	@LuaFunction(mainThread = true)
+	public final Map<Integer, Map<String, ?>> getConfiguration() throws LuaException {
+		List<BigItemStack> stacks = blockEntity.encodedRequest.stacks();
+		Map<Integer, Map<String, ?>> result = new HashMap<>();
+		// Loop through the packageOrder get each bigItem stack
+		//
+		for (int i = 0; i < stacks.size(); i++) {
+			ItemStack stack = stacks.get(i).stack;
+			Map<String, Object> details = new HashMap<>(
+					VanillaDetailRegistries.ITEM_STACK.getDetails(stack));
+			if (!details.get("name").equals("minecraft:air")) {
+				details.put("count", stacks.get(i).count);
+				result.put(i + 1, details); // +1 because lua
+			}
+		}
+		return result;
 	}
 
 	@NotNull
