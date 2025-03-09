@@ -89,7 +89,7 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 
 	public List<ItemStack> getItemsForRender() {
 		if (isShop()) {
-			if (renderedItemsForShop == null)
+//			if (renderedItemsForShop == null)
 				renderedItemsForShop = requestData.encodedRequest.stacks()
 					.stream()
 					.map(b -> b.stack)

@@ -121,7 +121,7 @@ public class TableClothPeripheral extends SyncedPeripheral<TableClothBlockEntity
 				ResourceLocation resourceLocation = ResourceLocation.tryParse(itemName);
 				ItemLike item = BuiltInRegistries.ITEM.get(resourceLocation);
 				list.add(new BigItemStack(new ItemStack(item), count));
-				blockEntity.updateShopRender();
+//				blockEntity.updateShopRender();
 			}
 		}
 		blockEntity.requestData.encodedRequest = new PackageOrder(list);
