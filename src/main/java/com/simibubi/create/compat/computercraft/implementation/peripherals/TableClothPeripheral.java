@@ -3,6 +3,7 @@ package com.simibubi.create.compat.computercraft.implementation.peripherals;
 import com.simibubi.create.compat.computercraft.implementation.ComputerUtil;
 import com.simibubi.create.content.logistics.tableCloth.TableClothBlockEntity;
 import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
+import com.simibubi.create.content.logistics.redstoneRequester.AutoRequestData;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import com.simibubi.create.content.logistics.BigItemStack;
@@ -33,16 +34,17 @@ public class TableClothPeripheral extends SyncedPeripheral<TableClothBlockEntity
 
 	@LuaFunction(mainThread = true)
 	public final String getAddress() throws LuaException {
-		return blockEntity.requestData.encodedTargetAdress;
+		return blockEntity.requestData.encodedTargetAddress();
 	}
 
 	@LuaFunction(mainThread = true)
 	public final void setAddress(Optional<String> argument) throws LuaException {
+		AutoRequestData.Mutable mutable = new AutoRequestData.Mutable(blockEntity.requestData);
 		if (argument.isPresent())
-			blockEntity.requestData.encodedTargetAdress = argument.get();
+			mutable.encodedTargetAddress = argument.get();
 		else
-			blockEntity.requestData.encodedTargetAdress = "";
-
+			mutable.encodedTargetAddress = "";
+		blockEntity.requestData = mutable.toImmutable();
 	}
 
 	@LuaFunction(mainThread = true)
@@ -75,7 +77,7 @@ public class TableClothPeripheral extends SyncedPeripheral<TableClothBlockEntity
 
 	@LuaFunction(mainThread = true)
 	public final Map<Integer, Map<String, ?>> getWares() throws LuaException {
-		List<BigItemStack> wares = blockEntity.requestData.encodedRequest.stacks();
+		List<BigItemStack> wares = blockEntity.requestData.encodedRequest().stacks();
 		Map<Integer, Map<String, ?>> result = new HashMap<>();
 		for (int i = 0; i < wares.size(); i++) {
 			ItemStack stack = wares.get(i).stack;
@@ -124,8 +126,10 @@ public class TableClothPeripheral extends SyncedPeripheral<TableClothBlockEntity
 				blockEntity.updateShopRender();
 			}
 		}
-		blockEntity.requestData.encodedRequest = new PackageOrder(list);
-		blockEntity.requestData.encodedRequestContext = new PackageOrder(list);
+		AutoRequestData.Mutable mutable = new AutoRequestData.Mutable(blockEntity.requestData);
+		mutable.encodedRequest = new PackageOrder(list);
+		mutable.encodedRequestContext = new PackageOrder(list);
+		blockEntity.requestData = mutable.toImmutable();
 		blockEntity.notifyUpdate();
 	}
 
