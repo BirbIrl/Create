@@ -11,6 +11,9 @@ import org.jetbrains.annotations.NotNull;
 import com.simibubi.create.content.logistics.redstoneRequester.RedstoneRequesterBlockEntity;
 import com.simibubi.create.content.logistics.BigItemStack;
 import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
+
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ArrayList;
@@ -82,6 +85,19 @@ public class RedstoneRequesterPeripheral extends SyncedPeripheral<RedstoneReques
 	@LuaFunction(mainThread = true)
 	public final String getAddress() throws LuaException {
 		return blockEntity.encodedTargetAdress;
+	}
+
+	@LuaFunction(mainThread = true)
+	public final Map<Integer, Map<?,?>> getConfiguration()  throws LuaException {
+		PackageOrder packageOrder = this.blockEntity.encodedRequest;
+		Map<Integer, Map<?,?>> table = new HashMap<>();
+		//Loop through the packageOrder get each bigItem stack
+		for(BigItemStack itemStack : packageOrder.stacks()){
+			Map<String, Integer> tableEntry = new HashMap<>();
+			//SO LIKE HOW GET KEY??? AM I DUMB??? losing it fr fr
+			System.out.println(itemStack.stack.getItem());
+		}
+		return table;
 	}
 
 	@NotNull
