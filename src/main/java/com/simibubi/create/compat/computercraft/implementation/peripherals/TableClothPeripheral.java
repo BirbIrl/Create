@@ -33,6 +33,11 @@ public class TableClothPeripheral extends SyncedPeripheral<TableClothBlockEntity
 	}
 
 	@LuaFunction(mainThread = true)
+	public final boolean isShop() {
+		return blockEntity.isShop();
+	}
+
+	@LuaFunction(mainThread = true)
 	public final String getAddress() throws LuaException {
 		return blockEntity.requestData.encodedTargetAddress();
 	}
