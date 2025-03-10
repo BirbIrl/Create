@@ -89,7 +89,7 @@ public class TableClothScenes {
 				.at(3, 2, 3), TableClothBlock.HAS_BE);
 		scene.world()
 			.modifyBlockEntity(util.grid()
-				.at(3, 2, 3), TableClothBlockEntity.class, be -> be.pushItem(grass));
+				.at(3, 2, 3), TableClothBlockEntity.class, be -> be.manuallyAddedItems.add(grass));
 		scene.idle(10);
 
 		scene.overlay()

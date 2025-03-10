@@ -21,7 +21,6 @@ import com.simibubi.create.foundation.blockEntity.RemoveBlockEntityPacket;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.blockEntity.behaviour.filtering.FilteringBehaviour;
-import com.simibubi.create.foundation.item.SmartInventory;
 import com.simibubi.create.foundation.utility.CreateLang;
 
 import net.createmod.catnip.data.IntAttached;
@@ -56,7 +55,7 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 	public AbstractComputerBehaviour computerBehaviour;
 
 	public AutoRequestData requestData;
-	public SmartInventory manuallyAddedItems;
+	public List<ItemStack> manuallyAddedItems;
 	public UUID owner;
 
 	public Direction facing;
@@ -64,11 +63,10 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 	public FilteringBehaviour priceTag;
 
 	private List<ItemStack> renderedItemsForShop;
-	private List<ItemStack> cachedItems;
 
 	public TableClothBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
 		super(type, pos, state);
-		manuallyAddedItems = new SmartInventory(4, this, 1, false);
+		manuallyAddedItems = new ArrayList<>();
 		requestData = new AutoRequestData();
 		owner = null;
 		facing = Direction.SOUTH;
@@ -97,11 +95,12 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 					.toList();
 			return renderedItemsForShop;
 		}
-		return cachedItems();
+
+		return manuallyAddedItems;
 	}
 
-	public void updateShopRender() {
-		AllPackets.getChannel().send(packetTarget(), new RemoveBlockEntityPacket(worldPosition));
+	public void invalidateItemsForRender() {
+		renderedItemsForShop = null;
 	}
 
 	@Override
@@ -122,57 +121,6 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 		return !requestData.encodedRequest.isEmpty();
 	}
 
-	public ItemStack popItem() {
-		if (isShop() || manuallyAddedItems.isEmpty())
-			return ItemStack.EMPTY;
-
-		for (int i = manuallyAddedItems.getSlots() - 1; i >= 0; i--) {
-			if (!manuallyAddedItems.getStackInSlot(i).isEmpty()) {
-				ItemStack item = manuallyAddedItems.getStackInSlot(i);
-				manuallyAddedItems.setStackInSlot(i, ItemStack.EMPTY);
-				return item;
-			}
-		}
-		return ItemStack.EMPTY;
-	}
-
-	public void pushItem(ItemStack stack) {
-		if (isShop())
-			return;
-
-		for (int i = 0; i < manuallyAddedItems.getSlots(); i++) {
-			if (manuallyAddedItems.getStackInSlot(i).isEmpty()) {
-				manuallyAddedItems.setStackInSlot(i, stack);
-				return;
-			}
-		}
-	}
-
-	public List<ItemStack> items() {
-		List<ItemStack> items = new ArrayList<>();
-		for (int i = 0; i < manuallyAddedItems.getSlots(); i++) {
-			if (!manuallyAddedItems.getStackInSlot(i).isEmpty()) {
-				items.add(manuallyAddedItems.getStackInSlot(i));
-			}
-		}
-		return items;
-	}
-
-	public List<ItemStack> cachedItems() {
-		if (cachedItems == null)
-			cachedItems = items();
-		return cachedItems;
-	}
-
-	public boolean isFull() {
-		for (int i = 0; i < manuallyAddedItems.getSlots(); i++) {
-			if (manuallyAddedItems.getStackInSlot(i).isEmpty()) {
-				return false;
-			}
-		}
-		return true;
-	}
-
 	public InteractionResult use(Player player, BlockHitResult ray) {
 		if (isShop())
 			return useShop(player);
@@ -182,10 +130,10 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 		if (heldItem.isEmpty()) {
 			if (manuallyAddedItems.isEmpty())
 				return InteractionResult.SUCCESS;
-			player.setItemInHand(InteractionHand.MAIN_HAND, popItem());
+			player.setItemInHand(InteractionHand.MAIN_HAND, manuallyAddedItems.remove(manuallyAddedItems.size() - 1));
 			level.playSound(null, worldPosition, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 0.5f, 1f);
-			cachedItems = items();
-			if (manuallyAddedItems.isEmpty() && !computerBehaviour.hasAttachedComputer()) {
+
+			if (manuallyAddedItems.isEmpty()) {
 				level.setBlock(worldPosition, getBlockState().setValue(TableClothBlock.HAS_BE, false), 3);
 				AllPackets.getChannel()
 					.send(packetTarget(), new RemoveBlockEntityPacket(worldPosition));
@@ -195,11 +143,11 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 			return InteractionResult.SUCCESS;
 		}
 
-		if (isFull())
+		if (manuallyAddedItems.size() >= 4)
 			return InteractionResult.SUCCESS;
 
 		level.playSound(null, worldPosition, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.5f, 1f);
-		pushItem(heldItem.copyWithCount(1));
+		manuallyAddedItems.add(heldItem.copyWithCount(1));
 		facing = player.getDirection()
 			.getOpposite();
 		heldItem.shrink(1);
@@ -361,7 +309,7 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 	@Override
 	protected void write(CompoundTag tag, boolean clientPacket) {
 		super.write(tag, clientPacket);
-		tag.put("Items", NBTHelper.writeItemList(items()));
+		tag.put("Items", NBTHelper.writeItemList(manuallyAddedItems));
 		tag.putInt("Facing", facing.get2DDataValue());
 		requestData.write(tag);
 		if (owner != null)
@@ -371,11 +319,7 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 	@Override
 	protected void read(CompoundTag tag, boolean clientPacket) {
 		super.read(tag, clientPacket);
-		List<ItemStack> items = NBTHelper.readItemList(tag.getList("Items", Tag.TAG_COMPOUND));
-		for (int i = 0; i < items.size(); i++) {
-			manuallyAddedItems.setStackInSlot(i, items.get(i));
-		}
-		cachedItems = items;
+		manuallyAddedItems = NBTHelper.readItemList(tag.getList("Items", Tag.TAG_COMPOUND));
 		requestData = AutoRequestData.read(tag);
 		owner = tag.contains("OwnerUUID") ? tag.getUUID("OwnerUUID") : null;
 		facing = Direction.from2DDataValue(Mth.positiveModulo(tag.getInt("Facing"), 4));
@@ -384,11 +328,9 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 	@Override
 	public void destroy() {
 		super.destroy();
-		items().forEach(stack -> Containers.dropItemStack(level, worldPosition.getX(), worldPosition.getY(),
+		manuallyAddedItems.forEach(stack -> Containers.dropItemStack(level, worldPosition.getX(), worldPosition.getY(),
 			worldPosition.getZ(), stack));
-		for (int i = 0; i < manuallyAddedItems.getSlots(); i++) {
-			manuallyAddedItems.setStackInSlot(i, ItemStack.EMPTY);
-		}
+		manuallyAddedItems.clear();
 	}
 
 	public ItemStack getPaymentItem() {
