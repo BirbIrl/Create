@@ -90,10 +90,9 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 	public static void registerCapabilities(RegisterCapabilitiesEvent event) {
 		if (Mods.COMPUTERCRAFT.isLoaded()) {
 			event.registerBlockEntity(
-				PeripheralCapability.get(),
-				AllBlockEntityTypes.TABLE_CLOTH.get(),
-				(be, context) -> be.computerBehaviour.getPeripheralCapability()
-			);
+					PeripheralCapability.get(),
+					AllBlockEntityTypes.TABLE_CLOTH.get(),
+					(be, context) -> be.computerBehaviour.getPeripheralCapability());
 		}
 	}
 
@@ -101,10 +100,10 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 		if (isShop()) {
 			if (renderedItemsForShop == null)
 				renderedItemsForShop = requestData.encodedRequest().stacks()
-					.stream()
-					.map(b -> b.stack)
-					.limit(4)
-					.toList();
+						.stream()
+						.map(b -> b.stack)
+						.limit(4)
+						.toList();
 			return renderedItemsForShop;
 		}
 
@@ -117,7 +116,8 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 
 	public void notifyShopUpdate() {
 		if (level instanceof ServerLevel serverLevel)
-			CatnipServices.NETWORK.sendToClientsTrackingChunk(serverLevel, new ChunkPos(worldPosition), new ShopUpdatePacket(worldPosition));
+			CatnipServices.NETWORK.sendToClientsTrackingChunk(serverLevel, new ChunkPos(worldPosition),
+					new ShopUpdatePacket(worldPosition));
 	}
 
 	@Override
@@ -125,8 +125,8 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 		super.lazyTick();
 		BlockPos relativePos = worldPosition.relative(facing);
 		sideOccluded = AllBlockTags.TABLE_CLOTHS.matches(level.getBlockState(relativePos))
-			|| Block.isFaceFull(level.getBlockState(relativePos.below())
-			.getOcclusionShape(level, relativePos.below()), facing.getOpposite());
+				|| Block.isFaceFull(level.getBlockState(relativePos.below())
+						.getOcclusionShape(level, relativePos.below()), facing.getOpposite());
 	}
 
 	@Override
@@ -150,10 +150,11 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 			player.setItemInHand(InteractionHand.MAIN_HAND, manuallyAddedItems.remove(manuallyAddedItems.size() - 1));
 			level.playSound(null, worldPosition, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 0.5f, 1f);
 
-			if (manuallyAddedItems.isEmpty()) {
+			if (manuallyAddedItems.isEmpty() && !computerBehaviour.hasAttachedComputer()) {
 				level.setBlock(worldPosition, getBlockState().setValue(TableClothBlock.HAS_BE, false), 3);
 				if (level instanceof ServerLevel serverLevel)
-					CatnipServices.NETWORK.sendToClientsTrackingChunk(serverLevel, new ChunkPos(worldPosition), new RemoveBlockEntityPacket(worldPosition));
+					CatnipServices.NETWORK.sendToClientsTrackingChunk(serverLevel, new ChunkPos(worldPosition),
+							new RemoveBlockEntityPacket(worldPosition));
 			} else
 				notifyUpdate();
 
@@ -166,7 +167,7 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 		level.playSound(null, worldPosition, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.5f, 1f);
 		manuallyAddedItems.add(heldItem.copyWithCount(1));
 		facing = player.getDirection()
-			.getOpposite();
+				.getOpposite();
 		heldItem.shrink(1);
 		if (heldItem.isEmpty())
 			player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
@@ -176,8 +177,8 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 
 	public boolean targetsPriceTag(Player player, BlockHitResult ray) {
 		return priceTag != null && priceTag.mayInteract(player) && priceTag.getSlotPositioning()
-			.testHit(level, worldPosition, getBlockState(), ray.getLocation()
-				.subtract(Vec3.atLowerCornerOf(worldPosition)));
+				.testHit(level, worldPosition, getBlockState(), ray.getLocation()
+						.subtract(Vec3.atLowerCornerOf(worldPosition)));
 	}
 
 	public ItemInteractionResult useShop(Player player) {
@@ -188,13 +189,13 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 		// Remove other lists from inventory
 		for (int i = 0; i < 9; i++) {
 			ItemStack item = player.getInventory()
-				.getItem(i);
+					.getItem(i);
 			if (!AllItems.SHOPPING_LIST.isIn(item))
 				continue;
 			prevListItem = item;
 			addOntoList = true;
 			player.getInventory()
-				.setItem(i, ItemStack.EMPTY);
+					.setItem(i, ItemStack.EMPTY);
 		}
 
 		// add onto existing list if in hand
@@ -205,14 +206,14 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 
 		if (!itemInHand.isEmpty() && !addOntoList) {
 			CreateLang.translate("stock_keeper.shopping_list_empty_hand")
-				.sendStatus(player);
+					.sendStatus(player);
 			AllSoundEvents.DENY.playOnServer(level, worldPosition, 0.5f, 1);
 			return ItemInteractionResult.SUCCESS;
 		}
 
 		if (getPaymentItem().isEmpty()) {
 			CreateLang.translate("stock_keeper.no_price_set")
-				.sendStatus(player);
+					.sendStatus(player);
 			AllSoundEvents.DENY.playOnServer(level, worldPosition, 0.5f, 1);
 			return ItemInteractionResult.SUCCESS;
 		}
@@ -226,24 +227,24 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 
 		if (tickerID == null) {
 			CreateLang.translate("stock_keeper.keeper_missing")
-				.style(ChatFormatting.RED)
-				.sendStatus(player);
+					.style(ChatFormatting.RED)
+					.sendStatus(player);
 			AllSoundEvents.DENY.playOnServer(level, worldPosition, 0.5f, 1);
 			return ItemInteractionResult.SUCCESS;
 		}
 
 		if (stockLevel == 0) {
 			CreateLang.translate("stock_keeper.out_of_stock")
-				.style(ChatFormatting.RED)
-				.sendStatus(player);
+					.style(ChatFormatting.RED)
+					.sendStatus(player);
 			AllSoundEvents.DENY.playOnServer(level, worldPosition, 0.5f, 1);
 			if (!prevListItem.isEmpty()) {
 				if (player.getItemInHand(InteractionHand.MAIN_HAND)
-					.isEmpty())
+						.isEmpty())
 					player.setItemInHand(InteractionHand.MAIN_HAND, prevListItem);
 				else
 					player.getInventory()
-						.placeItemBackInInventory(prevListItem);
+							.placeItemBackInInventory(prevListItem);
 			}
 
 			return ItemInteractionResult.SUCCESS;
@@ -265,29 +266,29 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 					entry.setFirst(Math.min(stockLevel, entry.getFirst()));
 
 			CreateLang.translate("stock_keeper.limited_stock")
-				.style(ChatFormatting.RED)
-				.sendStatus(player);
+					.style(ChatFormatting.RED)
+					.sendStatus(player);
 
 		} else {
 			AllSoundEvents.CONFIRM_2.playOnServer(level, worldPosition, 0.5f, 1.0f);
 			list.addPurchases(worldPosition, 1);
 			if (!addOntoList)
 				CreateLang.translate("stock_keeper.use_list_to_add_purchases")
-					.color(0xeeeeee)
-					.sendStatus(player);
+						.color(0xeeeeee)
+						.sendStatus(player);
 			if (!addOntoList)
 				level.playSound(null, worldPosition, SoundEvents.BOOK_PAGE_TURN, SoundSource.BLOCKS, 1, 1.5f);
 		}
 
-		ItemStack newListItem =
-			ShoppingListItem.saveList(AllItems.SHOPPING_LIST.asStack(), list, requestData.encodedTargetAddress());
+		ItemStack newListItem = ShoppingListItem.saveList(AllItems.SHOPPING_LIST.asStack(), list,
+				requestData.encodedTargetAddress());
 
 		if (player.getItemInHand(InteractionHand.MAIN_HAND)
-			.isEmpty())
+				.isEmpty())
 			player.setItemInHand(InteractionHand.MAIN_HAND, newListItem);
 		else
 			player.getInventory()
-				.placeItemBackInInventory(newListItem);
+					.placeItemBackInInventory(newListItem);
 
 		return ItemInteractionResult.SUCCESS;
 	}
@@ -312,13 +313,14 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 		InventorySummary modifierSummary = new InventorySummary();
 		if (otherPurchases != null)
 			modifierSummary = otherPurchases.bakeEntries(level, worldPosition)
-				.getFirst();
+					.getFirst();
 
 		int smallestQuotient = Integer.MAX_VALUE;
 		for (BigItemStack entry : requestData.encodedRequest().stacks())
 			if (entry.count > 0)
 				smallestQuotient = Math.min(smallestQuotient,
-					(recentSummary.getCountOf(entry.stack) - modifierSummary.getCountOf(entry.stack)) / entry.count);
+						(recentSummary.getCountOf(entry.stack) - modifierSummary.getCountOf(entry.stack))
+								/ entry.count);
 
 		return smallestQuotient;
 	}
@@ -338,7 +340,7 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 		super.read(tag, registries, clientPacket);
 		manuallyAddedItems = NBTHelper.readItemList(tag.getList("Items", Tag.TAG_COMPOUND), registries);
 		requestData = CatnipCodecUtils.decode(AutoRequestData.CODEC, tag.get("RequestData"))
-			.orElse(new AutoRequestData());
+				.orElse(new AutoRequestData());
 		owner = tag.contains("OwnerUUID") ? tag.getUUID("OwnerUUID") : null;
 		facing = Direction.from2DDataValue(Mth.positiveModulo(tag.getInt("Facing"), 4));
 	}
@@ -347,7 +349,7 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 	public void destroy() {
 		super.destroy();
 		manuallyAddedItems.forEach(stack -> Containers.dropItemStack(level, worldPosition.getX(), worldPosition.getY(),
-			worldPosition.getZ(), stack));
+				worldPosition.getZ(), stack));
 		manuallyAddedItems.clear();
 	}
 
@@ -357,7 +359,7 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 
 	public int getPaymentAmount() {
 		return priceTag.getFilter()
-			.isEmpty() ? 1 : priceTag.count;
+				.isEmpty() ? 1 : priceTag.count;
 	}
 
 }
