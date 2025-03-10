@@ -105,7 +105,7 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 
 	public void notifyShopUpdate() {
 		AllPackets.getChannel()
-			.send(packetTarget(), new RemoveBlockEntityPacket(worldPosition));
+			.send(packetTarget(), new ShopUpdatePacket(worldPosition));
 	}
 
 	@Override
