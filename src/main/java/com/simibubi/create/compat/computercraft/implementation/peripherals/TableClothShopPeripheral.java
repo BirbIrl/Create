@@ -34,6 +34,11 @@ public class TableClothShopPeripheral extends SyncedPeripheral<TableClothBlockEn
 	}
 
 	@LuaFunction(mainThread = true)
+	public final boolean isShop() {
+		return blockEntity.isShop();
+	}
+
+	@LuaFunction(mainThread = true)
 	public final String getAddress() throws LuaException {
 		assertShop();
 		return blockEntity.requestData.encodedTargetAdress;
@@ -89,7 +94,7 @@ public class TableClothShopPeripheral extends SyncedPeripheral<TableClothBlockEn
 		for (int i = 0; i < wares.size(); i++) {
 			ItemStack stack = wares.get(i).stack;
 			Map<String, Object> details = new HashMap<>(
-				VanillaDetailRegistries.ITEM_STACK.getDetails(stack));
+					VanillaDetailRegistries.ITEM_STACK.getDetails(stack));
 			details.put("count", wares.get(i).count);
 			result.put(i + 1, details); // +1 because lua
 		}
