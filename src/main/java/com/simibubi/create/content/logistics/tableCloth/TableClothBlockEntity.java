@@ -103,6 +103,11 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 		renderedItemsForShop = null;
 	}
 
+	public void notifyShopUpdate() {
+		AllPackets.getChannel()
+			.send(packetTarget(), new RemoveBlockEntityPacket(worldPosition));
+	}
+
 	@Override
 	public void lazyTick() {
 		super.lazyTick();
@@ -133,7 +138,7 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 			player.setItemInHand(InteractionHand.MAIN_HAND, manuallyAddedItems.remove(manuallyAddedItems.size() - 1));
 			level.playSound(null, worldPosition, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 0.5f, 1f);
 
-			if (manuallyAddedItems.isEmpty()) {
+			if (manuallyAddedItems.isEmpty() && !computerBehaviour.hasAttachedComputer()) {
 				level.setBlock(worldPosition, getBlockState().setValue(TableClothBlock.HAS_BE, false), 3);
 				AllPackets.getChannel()
 					.send(packetTarget(), new RemoveBlockEntityPacket(worldPosition));
