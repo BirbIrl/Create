@@ -211,7 +211,11 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 				return ItemInteractionResult.SUCCESS;
 			player.setItemInHand(InteractionHand.MAIN_HAND, popItem());
 			level.playSound(null, worldPosition, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 0.5f, 1f);
+<<<<<<< HEAD
 			cachedItems = items();
+=======
+
+>>>>>>> f20cfdce1 (Actually send the packet)
 			if (manuallyAddedItems.isEmpty() && !computerBehaviour.hasAttachedComputer()) {
 				level.setBlock(worldPosition, getBlockState().setValue(TableClothBlock.HAS_BE, false), 3);
 				if (level instanceof ServerLevel serverLevel)

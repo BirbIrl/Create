@@ -136,6 +136,7 @@ public class TableClothPeripheral extends SyncedPeripheral<TableClothBlockEntity
 		mutable.encodedRequestContext = new PackageOrder(list);
 		blockEntity.requestData = mutable.toImmutable();
 		blockEntity.notifyUpdate();
+		blockEntity.notifyShopUpdate();
 	}
 
 	@Override
