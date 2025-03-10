@@ -122,9 +122,13 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 		return cachedItems();
 	}
 
-	public void updateShopRender() {
-		if (level instanceof ServerLevel serverLevel)
-			CatnipServices.NETWORK.sendToClientsTrackingChunk(serverLevel, new ChunkPos(worldPosition), new RemoveBlockEntityPacket(worldPosition));
+	public void invalidateItemsForRender() {
+		renderedItemsForShop = null;
+	}
+
+	public void notifyShopUpdate() {
+		AllPackets.getChannel()
+			.send(packetTarget(), new ShopUpdatePacket(worldPosition));
 	}
 
 	@Override
