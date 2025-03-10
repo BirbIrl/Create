@@ -136,7 +136,7 @@ public class RepackagerBlockEntity extends PackagerBlockEntity {
 
 		notifyUpdate();
 	}
-
+	
 	public static void registerCapabilities(RegisterCapabilitiesEvent event) {
 		event.registerBlockEntity(
 			Capabilities.ItemHandler.BLOCK,

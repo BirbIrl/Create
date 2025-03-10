@@ -112,7 +112,6 @@ public class TableClothShopPeripheral extends SyncedPeripheral<TableClothBlockEn
 	 */
 	@LuaFunction(mainThread = true)
 	public final void setWares(IArguments arguments) throws LuaException {
-		assertShop();
 		if (!blockEntity.manuallyAddedItems.isEmpty())
 			throw new LuaException("Tablecloth isn't empty.");
 		ArrayList<BigItemStack> list = new ArrayList<>();

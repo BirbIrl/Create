@@ -423,7 +423,7 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 				itemsAddedToSlot += added;
 
 				contents.setStackInSlot(boxSlot,
-						toInsert.copyWithCount(toInsert.getCount() - added));
+					toInsert.copyWithCount(toInsert.getCount() - added));
 				}
 			}
 
