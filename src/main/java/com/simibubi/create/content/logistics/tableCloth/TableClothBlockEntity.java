@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.AllSoundEvents;
+import com.simibubi.create.AllPackets;
 import com.simibubi.create.AllTags.AllBlockTags;
 import com.simibubi.create.compat.Mods;
 import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
@@ -87,17 +88,6 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 	}
 
 	public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-		event.registerBlockEntity(
-			Capabilities.ItemHandler.BLOCK,
-			AllBlockEntityTypes.TABLE_CLOTH.get(),
-			(be, context) -> {
-				if (be.isShop()) {
-					return ComputerUtil.NOOP_HANDLER;
-				}
-				return be.manuallyAddedItems;
-			}
-		);
-
 		if (Mods.COMPUTERCRAFT.isLoaded()) {
 			event.registerBlockEntity(
 				PeripheralCapability.get(),
@@ -126,8 +116,8 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 	}
 
 	public void notifyShopUpdate() {
-		AllPackets.getChannel()
-			.send(packetTarget(), new ShopUpdatePacket(worldPosition));
+		if (level instanceof ServerLevel serverLevel)
+			CatnipServices.NETWORK.sendToClientsTrackingChunk(serverLevel, new ChunkPos(worldPosition), new ShopUpdatePacket(worldPosition));
 	}
 
 	@Override
@@ -156,7 +146,7 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 
 		if (heldItem.isEmpty()) {
 			if (manuallyAddedItems.isEmpty())
-				return InteractionResult.SUCCESS;
+				return ItemInteractionResult.SUCCESS;
 			player.setItemInHand(InteractionHand.MAIN_HAND, manuallyAddedItems.remove(manuallyAddedItems.size() - 1));
 			level.playSound(null, worldPosition, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 0.5f, 1f);
 
@@ -171,7 +161,7 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 		}
 
 		if (manuallyAddedItems.size() >= 4)
-			return InteractionResult.SUCCESS;
+			return ItemInteractionResult.SUCCESS;
 
 		level.playSound(null, worldPosition, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.5f, 1f);
 		manuallyAddedItems.add(heldItem.copyWithCount(1));
@@ -334,9 +324,9 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 	}
 
 	@Override
-	protected void write(CompoundTag tag, boolean clientPacket) {
-		super.write(tag, clientPacket);
-		tag.put("Items", NBTHelper.writeItemList(manuallyAddedItems));
+	protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
+		super.write(tag, registries, clientPacket);
+		tag.put("Items", NBTHelper.writeItemList(manuallyAddedItems, registries));
 		tag.putInt("Facing", facing.get2DDataValue());
 		tag.put("RequestData", CatnipCodecUtils.encode(AutoRequestData.CODEC, requestData).orElseThrow());
 		if (owner != null)
@@ -344,10 +334,11 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 	}
 
 	@Override
-	protected void read(CompoundTag tag, boolean clientPacket) {
-		super.read(tag, clientPacket);
-		manuallyAddedItems = NBTHelper.readItemList(tag.getList("Items", Tag.TAG_COMPOUND));
-		requestData = AutoRequestData.read(tag);
+	protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
+		super.read(tag, registries, clientPacket);
+		manuallyAddedItems = NBTHelper.readItemList(tag.getList("Items", Tag.TAG_COMPOUND), registries);
+		requestData = CatnipCodecUtils.decode(AutoRequestData.CODEC, registries, tag.get("RequestData"))
+			.orElse(new AutoRequestData());
 		owner = tag.contains("OwnerUUID") ? tag.getUUID("OwnerUUID") : null;
 		facing = Direction.from2DDataValue(Mth.positiveModulo(tag.getInt("Facing"), 4));
 	}
