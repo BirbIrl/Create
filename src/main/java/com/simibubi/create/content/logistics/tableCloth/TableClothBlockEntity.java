@@ -23,7 +23,6 @@ import com.simibubi.create.foundation.blockEntity.RemoveBlockEntityPacket;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.blockEntity.behaviour.filtering.FilteringBehaviour;
-import com.simibubi.create.foundation.item.SmartInventory;
 import com.simibubi.create.foundation.utility.CreateLang;
 
 import dan200.computercraft.api.peripheral.PeripheralCapability;
@@ -64,7 +63,7 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 	public AbstractComputerBehaviour computerBehaviour;
 
 	public AutoRequestData requestData;
-	public SmartInventory manuallyAddedItems;
+	public List<ItemStack> manuallyAddedItems;
 	public UUID owner;
 
 	public Direction facing;
@@ -72,11 +71,10 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 	public FilteringBehaviour priceTag;
 
 	private List<ItemStack> renderedItemsForShop;
-	private List<ItemStack> cachedItems;
 
 	public TableClothBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
 		super(type, pos, state);
-		manuallyAddedItems = new SmartInventory(4, this, 1, false);
+		manuallyAddedItems = new ArrayList<>();
 		requestData = new AutoRequestData();
 		owner = null;
 		facing = Direction.SOUTH;
@@ -119,16 +117,20 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 					.toList();
 			return renderedItemsForShop;
 		}
-		return cachedItems();
+
+		return manuallyAddedItems;
 	}
 
 	public void invalidateItemsForRender() {
 		renderedItemsForShop = null;
+<<<<<<< HEAD
 	}
 
 	public void notifyShopUpdate() {
 		AllPackets.getChannel()
 			.send(packetTarget(), new ShopUpdatePacket(worldPosition));
+=======
+>>>>>>> a21c86c61 (Removed normal TableCloth as peripheral)
 	}
 
 	@Override
@@ -149,6 +151,7 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 		return !requestData.encodedRequest().isEmpty();
 	}
 
+<<<<<<< HEAD
 	public ItemStack popItem() {
 		if (isShop() || manuallyAddedItems.isEmpty())
 			return ItemStack.EMPTY;
@@ -201,6 +204,9 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 	}
 
 	public ItemInteractionResult use(Player player, BlockHitResult ray) {
+=======
+	public InteractionResult use(Player player, BlockHitResult ray) {
+>>>>>>> a21c86c61 (Removed normal TableCloth as peripheral)
 		if (isShop())
 			return useShop(player);
 
@@ -208,6 +214,7 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 
 		if (heldItem.isEmpty()) {
 			if (manuallyAddedItems.isEmpty())
+<<<<<<< HEAD
 				return ItemInteractionResult.SUCCESS;
 			player.setItemInHand(InteractionHand.MAIN_HAND, popItem());
 			level.playSound(null, worldPosition, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 0.5f, 1f);
@@ -217,6 +224,13 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 
 >>>>>>> f20cfdce1 (Actually send the packet)
 			if (manuallyAddedItems.isEmpty() && !computerBehaviour.hasAttachedComputer()) {
+=======
+				return InteractionResult.SUCCESS;
+			player.setItemInHand(InteractionHand.MAIN_HAND, manuallyAddedItems.remove(manuallyAddedItems.size() - 1));
+			level.playSound(null, worldPosition, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 0.5f, 1f);
+
+			if (manuallyAddedItems.isEmpty()) {
+>>>>>>> a21c86c61 (Removed normal TableCloth as peripheral)
 				level.setBlock(worldPosition, getBlockState().setValue(TableClothBlock.HAS_BE, false), 3);
 				if (level instanceof ServerLevel serverLevel)
 					CatnipServices.NETWORK.sendToClientsTrackingChunk(serverLevel, new ChunkPos(worldPosition), new RemoveBlockEntityPacket(worldPosition));
@@ -226,11 +240,16 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 			return ItemInteractionResult.SUCCESS;
 		}
 
+<<<<<<< HEAD
 		if (isFull())
 			return ItemInteractionResult.SUCCESS;
+=======
+		if (manuallyAddedItems.size() >= 4)
+			return InteractionResult.SUCCESS;
+>>>>>>> a21c86c61 (Removed normal TableCloth as peripheral)
 
 		level.playSound(null, worldPosition, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.5f, 1f);
-		pushItem(heldItem.copyWithCount(1));
+		manuallyAddedItems.add(heldItem.copyWithCount(1));
 		facing = player.getDirection()
 			.getOpposite();
 		heldItem.shrink(1);
@@ -390,9 +409,15 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 	}
 
 	@Override
+<<<<<<< HEAD
 	protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
 		super.write(tag, registries, clientPacket);
 		tag.put("Items", NBTHelper.writeItemList(items(), registries));
+=======
+	protected void write(CompoundTag tag, boolean clientPacket) {
+		super.write(tag, clientPacket);
+		tag.put("Items", NBTHelper.writeItemList(manuallyAddedItems));
+>>>>>>> a21c86c61 (Removed normal TableCloth as peripheral)
 		tag.putInt("Facing", facing.get2DDataValue());
 		tag.put("RequestData", CatnipCodecUtils.encode(AutoRequestData.CODEC, requestData).orElseThrow());
 		if (owner != null)
@@ -400,6 +425,7 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 	}
 
 	@Override
+<<<<<<< HEAD
 	protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
 		super.read(tag, registries, clientPacket);
 		List<ItemStack> items = NBTHelper.readItemList(tag.getList("Items", Tag.TAG_COMPOUND), registries);
@@ -409,6 +435,12 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 		cachedItems = items;
 		requestData = CatnipCodecUtils.decode(AutoRequestData.CODEC, tag.get("RequestData"))
 			.orElse(new AutoRequestData());
+=======
+	protected void read(CompoundTag tag, boolean clientPacket) {
+		super.read(tag, clientPacket);
+		manuallyAddedItems = NBTHelper.readItemList(tag.getList("Items", Tag.TAG_COMPOUND));
+		requestData = AutoRequestData.read(tag);
+>>>>>>> a21c86c61 (Removed normal TableCloth as peripheral)
 		owner = tag.contains("OwnerUUID") ? tag.getUUID("OwnerUUID") : null;
 		facing = Direction.from2DDataValue(Mth.positiveModulo(tag.getInt("Facing"), 4));
 	}
@@ -416,11 +448,9 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 	@Override
 	public void destroy() {
 		super.destroy();
-		items().forEach(stack -> Containers.dropItemStack(level, worldPosition.getX(), worldPosition.getY(),
+		manuallyAddedItems.forEach(stack -> Containers.dropItemStack(level, worldPosition.getX(), worldPosition.getY(),
 			worldPosition.getZ(), stack));
-		for (int i = 0; i < manuallyAddedItems.getSlots(); i++) {
-			manuallyAddedItems.setStackInSlot(i, ItemStack.EMPTY);
-		}
+		manuallyAddedItems.clear();
 	}
 
 	public ItemStack getPaymentItem() {

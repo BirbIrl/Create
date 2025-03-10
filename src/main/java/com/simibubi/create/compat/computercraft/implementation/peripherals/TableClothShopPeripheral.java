@@ -1,12 +1,17 @@
 package com.simibubi.create.compat.computercraft.implementation.peripherals;
 
-import com.simibubi.create.compat.computercraft.implementation.ComputerUtil;
 import com.simibubi.create.content.logistics.tableCloth.TableClothBlockEntity;
 import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
+<<<<<<< HEAD:src/main/java/com/simibubi/create/compat/computercraft/implementation/peripherals/TableClothPeripheral.java
 import com.simibubi.create.content.logistics.redstoneRequester.AutoRequestData;
+=======
+
+>>>>>>> a21c86c61 (Removed normal TableCloth as peripheral):src/main/java/com/simibubi/create/compat/computercraft/implementation/peripherals/TableClothShopPeripheral.java
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+
 import com.simibubi.create.content.logistics.BigItemStack;
+
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 
@@ -14,22 +19,22 @@ import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.detail.VanillaDetailRegistries;
-import org.jetbrains.annotations.Nullable;
+
 import java.util.Optional;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 
-public class TableClothPeripheral extends SyncedPeripheral<TableClothBlockEntity> {
+public class TableClothShopPeripheral extends SyncedPeripheral<TableClothBlockEntity> {
 
-	public TableClothPeripheral(TableClothBlockEntity blockEntity) {
+	public TableClothShopPeripheral(TableClothBlockEntity blockEntity) {
 		super(blockEntity);
 	}
 
-	@LuaFunction(mainThread = true)
-	public final boolean isShop() {
-		return blockEntity.isShop();
+	private void assertShop() throws LuaException {
+		if (!blockEntity.isShop())
+			throw new LuaException("TableCloth is not a shop!");
 	}
 
 	@LuaFunction(mainThread = true)
@@ -39,12 +44,21 @@ public class TableClothPeripheral extends SyncedPeripheral<TableClothBlockEntity
 
 	@LuaFunction(mainThread = true)
 	public final String getAddress() throws LuaException {
+<<<<<<< HEAD:src/main/java/com/simibubi/create/compat/computercraft/implementation/peripherals/TableClothPeripheral.java
 		return blockEntity.requestData.encodedTargetAddress();
+=======
+		assertShop();
+		return blockEntity.requestData.encodedTargetAdress;
+>>>>>>> a21c86c61 (Removed normal TableCloth as peripheral):src/main/java/com/simibubi/create/compat/computercraft/implementation/peripherals/TableClothShopPeripheral.java
 	}
 
 	@LuaFunction(mainThread = true)
 	public final void setAddress(Optional<String> argument) throws LuaException {
+<<<<<<< HEAD:src/main/java/com/simibubi/create/compat/computercraft/implementation/peripherals/TableClothPeripheral.java
 		AutoRequestData.Mutable mutable = new AutoRequestData.Mutable(blockEntity.requestData);
+=======
+		assertShop();
+>>>>>>> a21c86c61 (Removed normal TableCloth as peripheral):src/main/java/com/simibubi/create/compat/computercraft/implementation/peripherals/TableClothShopPeripheral.java
 		if (argument.isPresent())
 			mutable.encodedTargetAddress = argument.get();
 		else
@@ -54,11 +68,13 @@ public class TableClothPeripheral extends SyncedPeripheral<TableClothBlockEntity
 
 	@LuaFunction(mainThread = true)
 	public final Map<String, ?> getPriceTagItem() throws LuaException {
+		assertShop();
 		return VanillaDetailRegistries.ITEM_STACK.getDetails(blockEntity.priceTag.getFilter());
 	}
 
 	@LuaFunction(mainThread = true)
 	public final void setPriceTagItem(Optional<String> itemName) throws LuaException {
+		assertShop();
 		ResourceLocation resourceLocation = ResourceLocation.tryParse("minecraft:air");
 		if (itemName.isPresent())
 			resourceLocation = ResourceLocation.tryParse(itemName.get());
@@ -68,11 +84,13 @@ public class TableClothPeripheral extends SyncedPeripheral<TableClothBlockEntity
 
 	@LuaFunction(mainThread = true)
 	public final int getPriceTagCount() throws LuaException {
+		assertShop();
 		return blockEntity.priceTag.count;
 	}
 
 	@LuaFunction(mainThread = true)
 	public final void setPriceTagCount(Optional<Double> argument) throws LuaException {
+		assertShop();
 		if (argument.isPresent())
 			blockEntity.priceTag.count = (Math.max(1, Math.min(100, argument.get().intValue())));
 		else
@@ -82,12 +100,17 @@ public class TableClothPeripheral extends SyncedPeripheral<TableClothBlockEntity
 
 	@LuaFunction(mainThread = true)
 	public final Map<Integer, Map<String, ?>> getWares() throws LuaException {
+<<<<<<< HEAD:src/main/java/com/simibubi/create/compat/computercraft/implementation/peripherals/TableClothPeripheral.java
 		List<BigItemStack> wares = blockEntity.requestData.encodedRequest().stacks();
+=======
+		assertShop();
+		List<BigItemStack> wares = blockEntity.requestData.encodedRequest.stacks();
+>>>>>>> a21c86c61 (Removed normal TableCloth as peripheral):src/main/java/com/simibubi/create/compat/computercraft/implementation/peripherals/TableClothShopPeripheral.java
 		Map<Integer, Map<String, ?>> result = new HashMap<>();
 		for (int i = 0; i < wares.size(); i++) {
 			ItemStack stack = wares.get(i).stack;
 			Map<String, Object> details = new HashMap<>(
-					VanillaDetailRegistries.ITEM_STACK.getDetails(stack));
+				VanillaDetailRegistries.ITEM_STACK.getDetails(stack));
 			details.put("count", wares.get(i).count);
 			result.put(i + 1, details); // +1 because lua
 		}
@@ -104,6 +127,7 @@ public class TableClothPeripheral extends SyncedPeripheral<TableClothBlockEntity
 	 */
 	@LuaFunction(mainThread = true)
 	public final void setWares(IArguments arguments) throws LuaException {
+		assertShop();
 		if (!blockEntity.manuallyAddedItems.isEmpty())
 			throw new LuaException("Tablecloth isn't empty.");
 		ArrayList<BigItemStack> list = new ArrayList<>();
@@ -128,7 +152,6 @@ public class TableClothPeripheral extends SyncedPeripheral<TableClothBlockEntity
 				ResourceLocation resourceLocation = ResourceLocation.tryParse(itemName);
 				ItemLike item = BuiltInRegistries.ITEM.get(resourceLocation);
 				list.add(new BigItemStack(new ItemStack(item), count));
-				blockEntity.updateShopRender();
 			}
 		}
 		AutoRequestData.Mutable mutable = new AutoRequestData.Mutable(blockEntity.requestData);
@@ -141,11 +164,7 @@ public class TableClothPeripheral extends SyncedPeripheral<TableClothBlockEntity
 
 	@Override
 	public String getType() {
-		return "Create_TableCloth";
+		return "Create_TableClothShop";
 	}
 
-	@Override
-	public @Nullable Object getTarget() {
-		return isShop() ? ComputerUtil.NOOP_HANDLER : blockEntity.manuallyAddedItems;
-	}
 }

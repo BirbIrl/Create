@@ -14,7 +14,7 @@ import com.simibubi.create.compat.computercraft.implementation.peripherals.Stati
 import com.simibubi.create.compat.computercraft.implementation.peripherals.StressGaugePeripheral;
 import com.simibubi.create.compat.computercraft.implementation.peripherals.StockTickerPeripheral;
 import com.simibubi.create.compat.computercraft.implementation.peripherals.PackagerPeripheral;
-import com.simibubi.create.compat.computercraft.implementation.peripherals.TableClothPeripheral;
+import com.simibubi.create.compat.computercraft.implementation.peripherals.TableClothShopPeripheral;
 import com.simibubi.create.content.logistics.packagePort.frogport.FrogportBlockEntity;
 import com.simibubi.create.content.logistics.packagePort.postbox.PostboxBlockEntity;
 import com.simibubi.create.compat.computercraft.implementation.peripherals.RedstoneRequesterPeripheral;
@@ -74,7 +74,7 @@ public class ComputerBehaviour extends AbstractComputerBehaviour {
 		if (be instanceof StationBlockEntity sbe)
 			return () -> new StationPeripheral(sbe);
 		if (be instanceof TableClothBlockEntity tcbe)
-			return () -> new TableClothPeripheral(tcbe);
+			return () -> new TableClothShopPeripheral(tcbe);
 
 		throw new IllegalArgumentException(
 			"No peripheral available for " + BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(be.getType()));
