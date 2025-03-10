@@ -123,14 +123,11 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 
 	public void invalidateItemsForRender() {
 		renderedItemsForShop = null;
-<<<<<<< HEAD
 	}
 
 	public void notifyShopUpdate() {
 		AllPackets.getChannel()
 			.send(packetTarget(), new ShopUpdatePacket(worldPosition));
-=======
->>>>>>> a21c86c61 (Removed normal TableCloth as peripheral)
 	}
 
 	@Override
@@ -151,62 +148,7 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 		return !requestData.encodedRequest().isEmpty();
 	}
 
-<<<<<<< HEAD
-	public ItemStack popItem() {
-		if (isShop() || manuallyAddedItems.isEmpty())
-			return ItemStack.EMPTY;
-
-		for (int i = manuallyAddedItems.getSlots() - 1; i >= 0; i--) {
-			if (!manuallyAddedItems.getStackInSlot(i).isEmpty()) {
-				ItemStack item = manuallyAddedItems.getStackInSlot(i);
-				manuallyAddedItems.setStackInSlot(i, ItemStack.EMPTY);
-				return item;
-			}
-		}
-		return ItemStack.EMPTY;
-	}
-
-	public void pushItem(ItemStack stack) {
-		if (isShop())
-			return;
-
-		for (int i = 0; i < manuallyAddedItems.getSlots(); i++) {
-			if (manuallyAddedItems.getStackInSlot(i).isEmpty()) {
-				manuallyAddedItems.setStackInSlot(i, stack);
-				return;
-			}
-		}
-	}
-
-	public List<ItemStack> items() {
-		List<ItemStack> items = new ArrayList<>();
-		for (int i = 0; i < manuallyAddedItems.getSlots(); i++) {
-			if (!manuallyAddedItems.getStackInSlot(i).isEmpty()) {
-				items.add(manuallyAddedItems.getStackInSlot(i));
-			}
-		}
-		return items;
-	}
-
-	public List<ItemStack> cachedItems() {
-		if (cachedItems == null)
-			cachedItems = items();
-		return cachedItems;
-	}
-
-	public boolean isFull() {
-		for (int i = 0; i < manuallyAddedItems.getSlots(); i++) {
-			if (manuallyAddedItems.getStackInSlot(i).isEmpty()) {
-				return false;
-			}
-		}
-		return true;
-	}
-
 	public ItemInteractionResult use(Player player, BlockHitResult ray) {
-=======
-	public InteractionResult use(Player player, BlockHitResult ray) {
->>>>>>> a21c86c61 (Removed normal TableCloth as peripheral)
 		if (isShop())
 			return useShop(player);
 
@@ -214,23 +156,11 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 
 		if (heldItem.isEmpty()) {
 			if (manuallyAddedItems.isEmpty())
-<<<<<<< HEAD
-				return ItemInteractionResult.SUCCESS;
-			player.setItemInHand(InteractionHand.MAIN_HAND, popItem());
-			level.playSound(null, worldPosition, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 0.5f, 1f);
-<<<<<<< HEAD
-			cachedItems = items();
-=======
-
->>>>>>> f20cfdce1 (Actually send the packet)
-			if (manuallyAddedItems.isEmpty() && !computerBehaviour.hasAttachedComputer()) {
-=======
 				return InteractionResult.SUCCESS;
 			player.setItemInHand(InteractionHand.MAIN_HAND, manuallyAddedItems.remove(manuallyAddedItems.size() - 1));
 			level.playSound(null, worldPosition, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 0.5f, 1f);
 
 			if (manuallyAddedItems.isEmpty()) {
->>>>>>> a21c86c61 (Removed normal TableCloth as peripheral)
 				level.setBlock(worldPosition, getBlockState().setValue(TableClothBlock.HAS_BE, false), 3);
 				if (level instanceof ServerLevel serverLevel)
 					CatnipServices.NETWORK.sendToClientsTrackingChunk(serverLevel, new ChunkPos(worldPosition), new RemoveBlockEntityPacket(worldPosition));
@@ -240,13 +170,8 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 			return ItemInteractionResult.SUCCESS;
 		}
 
-<<<<<<< HEAD
-		if (isFull())
-			return ItemInteractionResult.SUCCESS;
-=======
 		if (manuallyAddedItems.size() >= 4)
 			return InteractionResult.SUCCESS;
->>>>>>> a21c86c61 (Removed normal TableCloth as peripheral)
 
 		level.playSound(null, worldPosition, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 0.5f, 1f);
 		manuallyAddedItems.add(heldItem.copyWithCount(1));
@@ -409,15 +334,9 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 	}
 
 	@Override
-<<<<<<< HEAD
-	protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
-		super.write(tag, registries, clientPacket);
-		tag.put("Items", NBTHelper.writeItemList(items(), registries));
-=======
 	protected void write(CompoundTag tag, boolean clientPacket) {
 		super.write(tag, clientPacket);
 		tag.put("Items", NBTHelper.writeItemList(manuallyAddedItems));
->>>>>>> a21c86c61 (Removed normal TableCloth as peripheral)
 		tag.putInt("Facing", facing.get2DDataValue());
 		tag.put("RequestData", CatnipCodecUtils.encode(AutoRequestData.CODEC, requestData).orElseThrow());
 		if (owner != null)
@@ -425,22 +344,10 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 	}
 
 	@Override
-<<<<<<< HEAD
-	protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
-		super.read(tag, registries, clientPacket);
-		List<ItemStack> items = NBTHelper.readItemList(tag.getList("Items", Tag.TAG_COMPOUND), registries);
-		for (int i = 0; i < items.size(); i++) {
-			manuallyAddedItems.setStackInSlot(i, items.get(i));
-		}
-		cachedItems = items;
-		requestData = CatnipCodecUtils.decode(AutoRequestData.CODEC, tag.get("RequestData"))
-			.orElse(new AutoRequestData());
-=======
 	protected void read(CompoundTag tag, boolean clientPacket) {
 		super.read(tag, clientPacket);
 		manuallyAddedItems = NBTHelper.readItemList(tag.getList("Items", Tag.TAG_COMPOUND));
 		requestData = AutoRequestData.read(tag);
->>>>>>> a21c86c61 (Removed normal TableCloth as peripheral)
 		owner = tag.contains("OwnerUUID") ? tag.getUUID("OwnerUUID") : null;
 		facing = Direction.from2DDataValue(Mth.positiveModulo(tag.getInt("Facing"), 4));
 	}

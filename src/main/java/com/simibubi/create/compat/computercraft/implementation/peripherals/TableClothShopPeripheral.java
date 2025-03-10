@@ -2,11 +2,7 @@ package com.simibubi.create.compat.computercraft.implementation.peripherals;
 
 import com.simibubi.create.content.logistics.tableCloth.TableClothBlockEntity;
 import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
-<<<<<<< HEAD:src/main/java/com/simibubi/create/compat/computercraft/implementation/peripherals/TableClothPeripheral.java
 import com.simibubi.create.content.logistics.redstoneRequester.AutoRequestData;
-=======
-
->>>>>>> a21c86c61 (Removed normal TableCloth as peripheral):src/main/java/com/simibubi/create/compat/computercraft/implementation/peripherals/TableClothShopPeripheral.java
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 
@@ -44,21 +40,13 @@ public class TableClothShopPeripheral extends SyncedPeripheral<TableClothBlockEn
 
 	@LuaFunction(mainThread = true)
 	public final String getAddress() throws LuaException {
-<<<<<<< HEAD:src/main/java/com/simibubi/create/compat/computercraft/implementation/peripherals/TableClothPeripheral.java
-		return blockEntity.requestData.encodedTargetAddress();
-=======
 		assertShop();
 		return blockEntity.requestData.encodedTargetAdress;
->>>>>>> a21c86c61 (Removed normal TableCloth as peripheral):src/main/java/com/simibubi/create/compat/computercraft/implementation/peripherals/TableClothShopPeripheral.java
 	}
 
 	@LuaFunction(mainThread = true)
 	public final void setAddress(Optional<String> argument) throws LuaException {
-<<<<<<< HEAD:src/main/java/com/simibubi/create/compat/computercraft/implementation/peripherals/TableClothPeripheral.java
-		AutoRequestData.Mutable mutable = new AutoRequestData.Mutable(blockEntity.requestData);
-=======
 		assertShop();
->>>>>>> a21c86c61 (Removed normal TableCloth as peripheral):src/main/java/com/simibubi/create/compat/computercraft/implementation/peripherals/TableClothShopPeripheral.java
 		if (argument.isPresent())
 			mutable.encodedTargetAddress = argument.get();
 		else
@@ -100,12 +88,8 @@ public class TableClothShopPeripheral extends SyncedPeripheral<TableClothBlockEn
 
 	@LuaFunction(mainThread = true)
 	public final Map<Integer, Map<String, ?>> getWares() throws LuaException {
-<<<<<<< HEAD:src/main/java/com/simibubi/create/compat/computercraft/implementation/peripherals/TableClothPeripheral.java
-		List<BigItemStack> wares = blockEntity.requestData.encodedRequest().stacks();
-=======
 		assertShop();
 		List<BigItemStack> wares = blockEntity.requestData.encodedRequest.stacks();
->>>>>>> a21c86c61 (Removed normal TableCloth as peripheral):src/main/java/com/simibubi/create/compat/computercraft/implementation/peripherals/TableClothShopPeripheral.java
 		Map<Integer, Map<String, ?>> result = new HashMap<>();
 		for (int i = 0; i < wares.size(); i++) {
 			ItemStack stack = wares.get(i).stack;
