@@ -134,7 +134,10 @@ public class TableClothShopPeripheral extends SyncedPeripheral<TableClothBlockEn
 				}
 				ResourceLocation resourceLocation = ResourceLocation.tryParse(itemName);
 				ItemLike item = BuiltInRegistries.ITEM.get(resourceLocation);
-				list.add(new BigItemStack(new ItemStack(item), count));
+				ItemStack itemStack = new ItemStack(item);
+				if (itemStack.isEmpty())
+					throw new LuaException("Invalid item at index: " + (i + 1));
+				list.add(new BigItemStack(itemStack, count));
 			}
 		}
 		blockEntity.requestData.encodedRequest = new PackageOrder(list);
