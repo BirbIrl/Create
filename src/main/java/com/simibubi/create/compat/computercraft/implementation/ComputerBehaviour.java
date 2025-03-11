@@ -67,12 +67,11 @@ public class ComputerBehaviour extends AbstractComputerBehaviour {
 			return () -> new StressGaugePeripheral(sgbe);
 		if (be instanceof StockTickerBlockEntity sgbe)
 			return () -> new StockTickerPeripheral(sgbe);
-		if (be instanceof PackagerBlockEntity pgbe)
-			if (!(be instanceof RepackagerBlockEntity)){ // I really hate this, but I did not find any other way
-				return () -> new PackagerPeripheral(pgbe);
-			}
+		// Has to be before PackagerBlockEntity as it's a subclass
 		if (be instanceof RepackagerBlockEntity rpbe)
 			return () -> new RepackagerPeripheral(rpbe);
+		if (be instanceof PackagerBlockEntity pgbe)
+			return () -> new PackagerPeripheral(pgbe);
 		if (be instanceof RedstoneRequesterBlockEntity rrbe)
 			return () -> new RedstoneRequesterPeripheral(rrbe);
 		if (be instanceof StationBlockEntity sbe)

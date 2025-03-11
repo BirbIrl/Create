@@ -80,8 +80,8 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 	public boolean animationInward;
 
 	public AbstractComputerBehaviour computerBehaviour;
-	public Boolean hasCustomComputerAddress = false;
-	public String CustomComputerAddress = "";
+	public Boolean hasCustomComputerAddress;
+	public String customComputerAddress;
 
 	private InventorySummary availableItems;
 	private VersionedInventoryTrackerBehaviour invVersionTracker;
@@ -102,6 +102,8 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 		animationInward = true;
 		queuedExitingPackages = new LinkedList<>();
 		signBasedAddress = "";
+		customComputerAddress = "";
+		hasCustomComputerAddress = false;
 		buttonCooldown = 0;
 	}
 
@@ -579,7 +581,7 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 			signBasedAddress = address;
 		}
 		if (computerBehaviour.hasAttachedComputer() && hasCustomComputerAddress) {
-			signBasedAddress = CustomComputerAddress;
+			signBasedAddress = customComputerAddress;
 		} else {
 			hasCustomComputerAddress = false;
 		}
@@ -612,6 +614,8 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 		animationInward = compound.getBoolean("AnimationInward");
 		animationTicks = compound.getInt("AnimationTicks");
 		signBasedAddress = compound.getString("SignAddress");
+		customComputerAddress = compound.getString("ComputerAddress");
+		hasCustomComputerAddress = compound.getBoolean("HasComputerAddress");
 		heldBox = ItemStack.of(compound.getCompound("HeldBox"));
 		previouslyUnwrapped = ItemStack.of(compound.getCompound("InsertedBox"));
 		if (clientPacket)
@@ -628,6 +632,8 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 		compound.putBoolean("AnimationInward", animationInward);
 		compound.putInt("AnimationTicks", animationTicks);
 		compound.putString("SignAddress", signBasedAddress);
+		compound.putString("ComputerAddress", customComputerAddress);
+		compound.putBoolean("HasComputerAddress", hasCustomComputerAddress);
 		compound.put("HeldBox", heldBox.serializeNBT());
 		compound.put("InsertedBox", previouslyUnwrapped.serializeNBT());
 		if (clientPacket)
