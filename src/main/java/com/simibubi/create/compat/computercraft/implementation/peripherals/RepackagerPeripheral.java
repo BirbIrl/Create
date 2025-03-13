@@ -1,17 +1,9 @@
 package com.simibubi.create.compat.computercraft.implementation.peripherals;
 
-import java.lang.reflect.Array;
+
 import java.util.Optional;
 
 import com.simibubi.create.content.logistics.packager.repackager.RepackagerBlockEntity;
-
-import com.simibubi.create.foundation.utility.CreateLang;
-
-import net.createmod.catnip.nbt.NBTHelper;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.screens.multiplayer.WarningScreen;
-
-import net.minecraft.nbt.CompoundTag;
 
 import org.jetbrains.annotations.NotNull;
 
