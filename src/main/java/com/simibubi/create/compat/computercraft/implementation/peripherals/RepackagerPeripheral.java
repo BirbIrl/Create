@@ -1,5 +1,6 @@
 package com.simibubi.create.compat.computercraft.implementation.peripherals;
 
+
 import java.util.Optional;
 
 import com.simibubi.create.content.logistics.packager.repackager.RepackagerBlockEntity;
@@ -56,6 +57,14 @@ public class RepackagerPeripheral extends SyncedPeripheral<RepackagerBlockEntity
 		if (blockEntity.heldBox.isEmpty())
 			return false;
 		return true;
+	}
+
+	@LuaFunction(mainThread = true)
+	public final String getPackageAddress() throws LuaException { // Took me a while but this seems to work
+		if (!blockEntity.heldBox.isEmpty())
+			return blockEntity.heldBox.getOrCreateTag()
+				.getString("Address");
+		return null;
 	}
 
 	@NotNull
