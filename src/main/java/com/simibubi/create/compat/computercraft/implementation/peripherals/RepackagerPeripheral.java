@@ -1,8 +1,17 @@
 package com.simibubi.create.compat.computercraft.implementation.peripherals;
 
+import java.lang.reflect.Array;
 import java.util.Optional;
 
 import com.simibubi.create.content.logistics.packager.repackager.RepackagerBlockEntity;
+
+import com.simibubi.create.foundation.utility.CreateLang;
+
+import net.createmod.catnip.nbt.NBTHelper;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.screens.multiplayer.WarningScreen;
+
+import net.minecraft.nbt.CompoundTag;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -39,6 +48,12 @@ public class RepackagerPeripheral extends SyncedPeripheral<RepackagerBlockEntity
 		if (blockEntity.heldBox.isEmpty())
 			return false;
 		return true;
+	}
+
+	@LuaFunction(mainThread = true)
+	public final String getPackageAddress() throws LuaException { // Took me a while but this seems to work
+		return blockEntity.heldBox.getOrCreateTag()
+			.getString("Address");
 	}
 
 	@NotNull
