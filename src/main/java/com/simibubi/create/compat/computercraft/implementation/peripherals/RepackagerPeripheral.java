@@ -1,15 +1,21 @@
 package com.simibubi.create.compat.computercraft.implementation.peripherals;
 
 import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.simibubi.create.content.logistics.packager.repackager.RepackagerBlockEntity;
+import com.simibubi.create.content.logistics.box.PackageItem;
 
 import dan200.computercraft.api.peripheral.IComputerAccess;
 
 import org.jetbrains.annotations.NotNull;
 
+import net.minecraftforge.items.ItemStackHandler;
+import net.minecraft.world.item.ItemStack;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.lua.LuaFunction;
+import dan200.computercraft.api.detail.VanillaDetailRegistries;
 
 public class RepackagerPeripheral extends SyncedPeripheral<RepackagerBlockEntity> {
 
