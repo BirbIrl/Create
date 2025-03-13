@@ -28,14 +28,16 @@ public class PackagerPeripheral extends SyncedPeripheral<PackagerBlockEntity> {
 	@Override
 	public void attach(@NotNull IComputerAccess computer) {
 		super.attach(computer);
-		// Ephemeral nature of address, should not be set on load until a computer explicitly calls setAddress again on the BE.
+		// Ephemeral nature of address, should not be set on load until a computer
+		// explicitly calls setAddress again on the BE.
 		blockEntity.hasCustomComputerAddress = false;
 	}
 
 	@Override
 	public void detach(@NotNull IComputerAccess computer) {
 		super.detach(computer);
-		// Ephemeral nature of address, should not be set on load until a computer explicitly calls setAddress again on the BE.
+		// Ephemeral nature of address, should not be set on load until a computer
+		// explicitly calls setAddress again on the BE.
 		blockEntity.hasCustomComputerAddress = false;
 	}
 
@@ -100,7 +102,7 @@ public class PackagerPeripheral extends SyncedPeripheral<PackagerBlockEntity> {
 	}
 
 	@LuaFunction(mainThread = true)
-	public final Map<Integer, Map<String, ?>> checkPackage() throws LuaException {
+	public final Map<Integer, Map<String, ?>> getPackageItems() throws LuaException {
 		ItemStack box = blockEntity.heldBox;
 		if (box.isEmpty() && !PackageItem.isPackage(box))
 			return null;

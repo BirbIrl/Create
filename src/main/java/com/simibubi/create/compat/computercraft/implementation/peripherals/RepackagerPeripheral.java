@@ -1,6 +1,5 @@
 package com.simibubi.create.compat.computercraft.implementation.peripherals;
 
-
 import java.util.Optional;
 
 import com.simibubi.create.content.logistics.packager.repackager.RepackagerBlockEntity;
@@ -21,14 +20,16 @@ public class RepackagerPeripheral extends SyncedPeripheral<RepackagerBlockEntity
 	@Override
 	public void attach(@NotNull IComputerAccess computer) {
 		super.attach(computer);
-		// Ephemeral nature of address, should not be set on load until a computer explicitly calls setAddress again on the BE.
+		// Ephemeral nature of address, should not be set on load until a computer
+		// explicitly calls setAddress again on the BE.
 		blockEntity.hasCustomComputerAddress = false;
 	}
 
 	@Override
 	public void detach(@NotNull IComputerAccess computer) {
 		super.detach(computer);
-		// Ephemeral nature of address, should not be set on load until a computer explicitly calls setAddress again on the BE.
+		// Ephemeral nature of address, should not be set on load until a computer
+		// explicitly calls setAddress again on the BE.
 		blockEntity.hasCustomComputerAddress = false;
 	}
 
@@ -63,8 +64,26 @@ public class RepackagerPeripheral extends SyncedPeripheral<RepackagerBlockEntity
 	public final String getPackageAddress() throws LuaException { // Took me a while but this seems to work
 		if (!blockEntity.heldBox.isEmpty())
 			return blockEntity.heldBox.getOrCreateTag()
-				.getString("Address");
+					.getString("Address");
 		return null;
+	}
+
+	@LuaFunction(mainThread = true)
+	public final Map<Integer, Map<String, ?>> getPackageItems() throws LuaException {
+		ItemStack box = blockEntity.heldBox;
+		if (box.isEmpty() && !PackageItem.isPackage(box))
+			return null;
+		ItemStackHandler results = PackageItem.getContents(box);
+		Map<Integer, Map<String, ?>> result = new HashMap<>();
+		for (int i = 0; i < results.getSlots(); i++) {
+			ItemStack stack = results.getStackInSlot(i);
+			if (!stack.isEmpty()) {
+				Map<String, Object> details = new HashMap<>(
+						VanillaDetailRegistries.ITEM_STACK.getDetails(stack));
+				result.put(i + 1, details); // +1 because lua
+			}
+		}
+		return result;
 	}
 
 	@NotNull
