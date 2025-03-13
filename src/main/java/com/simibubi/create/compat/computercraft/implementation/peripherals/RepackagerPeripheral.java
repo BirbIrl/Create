@@ -52,8 +52,10 @@ public class RepackagerPeripheral extends SyncedPeripheral<RepackagerBlockEntity
 
 	@LuaFunction(mainThread = true)
 	public final String getPackageAddress() throws LuaException { // Took me a while but this seems to work
-		return blockEntity.heldBox.getOrCreateTag()
-			.getString("Address");
+		if (!blockEntity.heldBox.isEmpty())
+			return blockEntity.heldBox.getOrCreateTag()
+				.getString("Address");
+		return null;
 	}
 
 	@NotNull
