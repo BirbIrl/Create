@@ -102,6 +102,15 @@ public class PackagerPeripheral extends SyncedPeripheral<PackagerBlockEntity> {
 	}
 
 	@LuaFunction(mainThread = true)
+	public final void setPackageAddress(Optional<String> argument) {
+		if (argument.isPresent()) {
+			PackageItem.addAddress(blockEntity.heldBox, argument.get());
+		} else {
+			PackageItem.addAddress(blockEntity.heldBox, "");
+		}
+	}
+
+	@LuaFunction(mainThread = true)
 	public final Map<Integer, Map<String, ?>> getPackageItems() throws LuaException {
 		ItemStack box = blockEntity.heldBox;
 		if (box.isEmpty() && !PackageItem.isPackage(box))
