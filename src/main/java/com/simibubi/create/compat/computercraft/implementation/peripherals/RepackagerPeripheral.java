@@ -74,12 +74,16 @@ public class RepackagerPeripheral extends SyncedPeripheral<RepackagerBlockEntity
 	}
 
 	@LuaFunction(mainThread = true)
-	public final void setPackageAddress(Optional<String> argument) {
-		if (argument.isPresent()) {
-			PackageItem.addAddress(blockEntity.heldBox, argument.get());
-		} else {
-			PackageItem.addAddress(blockEntity.heldBox, "");
+	public final boolean setPackageAddress(Optional<String> argument) {
+		if (!blockEntity.heldBox.isEmpty()) {
+			if (argument.isPresent()) {
+				PackageItem.addAddress(blockEntity.heldBox, argument.get());
+			} else {
+				PackageItem.addAddress(blockEntity.heldBox, "");
+			}
+			return true;
 		}
+		return false;
 	}
 
 	@LuaFunction(mainThread = true)
