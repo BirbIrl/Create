@@ -1,7 +1,7 @@
 package com.simibubi.create.compat.computercraft.implementation.peripherals;
 
 import com.simibubi.create.content.logistics.tableCloth.TableClothBlockEntity;
-import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
+import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -140,8 +140,7 @@ public class TableClothShopPeripheral extends SyncedPeripheral<TableClothBlockEn
 				list.add(new BigItemStack(itemStack, count));
 			}
 		}
-		blockEntity.requestData.encodedRequest = new PackageOrder(list);
-		blockEntity.requestData.encodedRequestContext = new PackageOrder(list);
+		blockEntity.requestData.encodedRequest = PackageOrderWithCrafts.simple(list);
 		blockEntity.notifyUpdate();
 		blockEntity.notifyShopUpdate();
 	}

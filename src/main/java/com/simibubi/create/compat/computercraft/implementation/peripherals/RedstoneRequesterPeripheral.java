@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.simibubi.create.content.logistics.redstoneRequester.RedstoneRequesterBlockEntity;
 import com.simibubi.create.content.logistics.BigItemStack;
-import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
+import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts;
 
 import java.util.HashMap;
 import java.util.List;
@@ -68,8 +68,7 @@ public class RedstoneRequesterPeripheral extends SyncedPeripheral<RedstoneReques
 			}
 		}
 
-		this.blockEntity.encodedRequest = new PackageOrder(list);
-		this.blockEntity.encodedRequestContext = new PackageOrder(list);
+		this.blockEntity.encodedRequest = PackageOrderWithCrafts.simple(list);
 		this.blockEntity.notifyUpdate();
 	}
 
