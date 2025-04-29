@@ -10,7 +10,9 @@ import org.jetbrains.annotations.NotNull;
 
 import com.simibubi.create.content.logistics.redstoneRequester.RedstoneRequesterBlockEntity;
 import com.simibubi.create.content.logistics.BigItemStack;
+import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
 import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts;
+import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts.CraftingEntry;
 
 import java.util.HashMap;
 import java.util.List;
@@ -68,7 +70,10 @@ public class RedstoneRequesterPeripheral extends SyncedPeripheral<RedstoneReques
 			}
 		}
 
-		this.blockEntity.encodedRequest = PackageOrderWithCrafts.simple(list);
+		// XXX Maybe make the CraftingEntry's count configurable through the API?
+		this.blockEntity.encodedRequest = new PackageOrderWithCrafts(
+				new PackageOrder(list),
+				List.of(new CraftingEntry(new PackageOrder(list), 1)));
 		this.blockEntity.notifyUpdate();
 	}
 
