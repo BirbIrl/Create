@@ -25,12 +25,15 @@ import com.simibubi.create.AllPackets;
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.AllTags.AllItemTags;
+import com.simibubi.create.compat.Mods;
+import com.simibubi.create.compat.jei.CreateJEI;
 import com.simibubi.create.content.contraptions.actors.seat.SeatEntity;
 import com.simibubi.create.content.equipment.clipboard.ClipboardEntry;
 import com.simibubi.create.content.logistics.AddressEditBox;
 import com.simibubi.create.content.logistics.BigItemStack;
 import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelScreen;
 import com.simibubi.create.content.logistics.packager.InventorySummary;
+import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts.CraftingEntry;
 import com.simibubi.create.content.processing.burner.BlazeBurnerBlock.HeatLevel;
 import com.simibubi.create.content.processing.burner.BlazeBurnerBlockEntity;
 import com.simibubi.create.content.processing.burner.BlazeBurnerRenderer;
@@ -40,6 +43,7 @@ import com.simibubi.create.foundation.gui.ScreenWithStencils;
 import com.simibubi.create.foundation.gui.menu.AbstractSimiContainerScreen;
 import com.simibubi.create.foundation.gui.widget.ScrollInput;
 import com.simibubi.create.foundation.utility.CreateLang;
+import com.simibubi.create.infrastructure.config.AllConfigs;
 
 import dev.engine_room.flywheel.lib.model.baked.PartialModel;
 import net.createmod.catnip.animation.AnimationTickHolder;
@@ -121,7 +125,7 @@ public class StockKeeperRequestScreen extends AbstractSimiContainerScreen<StockK
 	int windowHeight;
 
 	public EditBox searchBox;
-	EditBox addressBox;
+	public AddressEditBox addressBox;
 
 	int emptyTicks = 0;
 	int successTicks = 0;
@@ -269,6 +273,7 @@ public class StockKeeperRequestScreen extends AbstractSimiContainerScreen<StockK
 		if (initial) {
 			playUiSound(SoundEvents.WOOD_HIT, 0.5f, 1.5f);
 			playUiSound(SoundEvents.BOOK_PAGE_TURN, 1, 1);
+			syncJEI();
 		}
 	}
 
@@ -293,7 +298,7 @@ public class StockKeeperRequestScreen extends AbstractSimiContainerScreen<StockK
 			ItemStack stack = blockEntity.categories.get(i);
 			CategoryEntry entry = new CategoryEntry(i, stack.isEmpty() ? ""
 				: stack.getHoverName()
-					.getString(),
+				.getString(),
 				0);
 			entry.hidden = hiddenCategories.contains(i);
 			categories.add(entry);
@@ -495,7 +500,7 @@ public class StockKeeperRequestScreen extends AbstractSimiContainerScreen<StockK
 				.style(ChatFormatting.ITALIC)
 				.component(), addressBox.getX(), addressBox.getY(), 0xff_CDBCA8, false);
 		}
-		
+
 		// Render keeper
 		int entitySizeOffset = 0;
 		LivingEntity keeper = stockKeeper.get();
@@ -816,12 +821,12 @@ public class StockKeeperRequestScreen extends AbstractSimiContainerScreen<StockK
 		if (addressBox.getValue()
 			.isBlank() && !addressBox.isFocused() && addressBox.isHovered()) {
 			graphics.renderComponentTooltip(font, List.of(CreateLang.translate("gui.factory_panel.restocker_address")
-				.color(ScrollInput.HEADER_RGB)
-				.component(),
-				CreateLang.translate("gui.schedule.lmb_edit")
-					.style(ChatFormatting.DARK_GRAY)
-					.style(ChatFormatting.ITALIC)
-					.component()),
+						.color(ScrollInput.HEADER_RGB)
+						.component(),
+					CreateLang.translate("gui.schedule.lmb_edit")
+						.style(ChatFormatting.DARK_GRAY)
+						.style(ChatFormatting.ITALIC)
+						.component()),
 				mouseX, mouseY);
 		}
 	}
@@ -1036,12 +1041,14 @@ public class StockKeeperRequestScreen extends AbstractSimiContainerScreen<StockK
 			refreshSearchNextTick = true;
 			moveToTopNextTick = true;
 			searchBox.setFocused(true);
+			syncJEI();
 			return true;
 		}
 
 		if (addressBox.isFocused()) {
-			if (addressBox.isHovered())
-				return addressBox.mouseClicked(pMouseX, pMouseY, pButton);
+			boolean result = addressBox.mouseClicked(pMouseX, pMouseY, pButton);
+			if (addressBox.isHovered() || result)
+				return result;
 			addressBox.setFocused(false);
 		}
 		if (searchBox.isFocused()) {
@@ -1099,9 +1106,7 @@ public class StockKeeperRequestScreen extends AbstractSimiContainerScreen<StockK
 				if (!entry.hidden) {
 					hiddenCategories.add(indexOf);
 					playUiSound(SoundEvents.ITEM_FRAME_ROTATE_ITEM, 1f, 1.5f);
-				}
-
-				else {
+				} else {
 					hiddenCategories.remove(indexOf);
 					playUiSound(SoundEvents.ITEM_FRAME_ROTATE_ITEM, 1f, 0.675f);
 				}
@@ -1299,6 +1304,7 @@ public class StockKeeperRequestScreen extends AbstractSimiContainerScreen<StockK
 		if (!Objects.equals(s, searchBox.getValue())) {
 			refreshSearchNextTick = true;
 			moveToTopNextTick = true;
+			syncJEI();
 		}
 		return true;
 	}
@@ -1325,6 +1331,7 @@ public class StockKeeperRequestScreen extends AbstractSimiContainerScreen<StockK
 		if (!Objects.equals(s, searchBox.getValue())) {
 			refreshSearchNextTick = true;
 			moveToTopNextTick = true;
+			syncJEI();
 		}
 		return true;
 	}
@@ -1333,8 +1340,8 @@ public class StockKeeperRequestScreen extends AbstractSimiContainerScreen<StockK
 	public void removed() {
 		SimpleChannel channel = AllPackets.getChannel();
 		BlockPos pos = blockEntity.getBlockPos();
-		channel.sendToServer(new PackageOrderRequestPacket(pos, new PackageOrder(Collections.emptyList()),
-			addressBox.getValue(), false, PackageOrder.empty()));
+		channel.sendToServer(
+			new PackageOrderRequestPacket(pos, PackageOrderWithCrafts.empty(), addressBox.getValue(), false));
 		channel.sendToServer(new StockKeeperCategoryHidingPacket(pos, new ArrayList<>(hiddenCategories)));
 		super.removed();
 	}
@@ -1354,14 +1361,24 @@ public class StockKeeperRequestScreen extends AbstractSimiContainerScreen<StockK
 			forcedEntries.add(toOrder.stack.copy(), -1 - Math.max(0, countOf - toOrder.count));
 		}
 
-		PackageOrder craftingRequest = PackageOrder.empty();
-		if (canRequestCraftingPackage && !itemsToOrder.isEmpty() && !recipesToOrder.isEmpty())
-			if (recipesToOrder.get(0).recipe instanceof CraftingRecipe cr)
-				craftingRequest = new PackageOrder(FactoryPanelScreen.convertRecipeToPackageOrderContext(cr, itemsToOrder));
+		PackageOrderWithCrafts order = PackageOrderWithCrafts.simple(itemsToOrder);
+		
+		if (canRequestCraftingPackage && !itemsToOrder.isEmpty() && !recipesToOrder.isEmpty()) {
+			List<CraftingEntry> craftList = new ArrayList<>();
+			for (CraftableBigItemStack cbis : recipesToOrder) {
+				if (!(cbis.recipe instanceof CraftingRecipe cr))
+					continue;
+				PackageOrder pattern =
+					new PackageOrder(FactoryPanelScreen.convertRecipeToPackageOrderContext(cr, itemsToOrder));
+				int count = cbis.count / cbis.getOutputCount(blockEntity.getLevel());
+				craftList.add(new CraftingEntry(pattern, count));
+			}
+			order = new PackageOrderWithCrafts(order.orderedStacks(), craftList);
+		}
 
 		AllPackets.getChannel()
-			.sendToServer(new PackageOrderRequestPacket(blockEntity.getBlockPos(), new PackageOrder(itemsToOrder),
-				addressBox.getValue(), encodeRequester, craftingRequest));
+			.sendToServer(new PackageOrderRequestPacket(blockEntity.getBlockPos(), order, addressBox.getValue(),
+				encodeRequester));
 
 		itemsToOrder = new ArrayList<>();
 		recipesToOrder = new ArrayList<>();
@@ -1490,8 +1507,6 @@ public class StockKeeperRequestScreen extends AbstractSimiContainerScreen<StockK
 		}
 
 		canRequestCraftingPackage = false;
-		if (recipesToOrder.size() != 1)
-			return;
 		for (BigItemStack ordered : itemsToOrder)
 			if (usedItems.getCountOf(ordered.stack) != ordered.count)
 				return;
@@ -1510,7 +1525,7 @@ public class StockKeeperRequestScreen extends AbstractSimiContainerScreen<StockK
 			List<BigItemStack> valid = new ArrayList<>();
 			for (List<BigItemStack> list : summary.getItemMap()
 				.values())
-				Entries: for (BigItemStack entry : list) {
+				Entries:for (BigItemStack entry : list) {
 					if (!ingredient.test(entry.stack))
 						continue;
 					BigItemStack asBis = new BigItemStack(entry.stack,
@@ -1600,6 +1615,11 @@ public class StockKeeperRequestScreen extends AbstractSimiContainerScreen<StockK
 
 		for (List<BigItemStack> list : validIngredients)
 			list.remove(chosen);
+	}
+
+	private void syncJEI() {
+		if (Mods.JEI.isLoaded() && AllConfigs.client().syncJeiSearch.get())
+			CreateJEI.runtime.getIngredientFilter().setFilterText(searchBox.getValue());
 	}
 
 }
