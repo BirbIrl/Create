@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 import dan200.computercraft.api.lua.LuaFunction;
+import net.minecraft.world.item.ItemStack;
 import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.detail.VanillaDetailRegistries;
@@ -27,11 +28,6 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 	public StockTickerPeripheral(StockTickerBlockEntity blockEntity) {
 		super(blockEntity);
 		// this.targetSpeed = targetSpeed;
-	}
-
-	@LuaFunction(mainThread = true)
-	public final int getItemCount() {
-		return blockEntity.getAccurateSummary().getTotalCount();
 	}
 
 	@LuaFunction(mainThread = true)
@@ -49,17 +45,18 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 	}
 
 	@LuaFunction(mainThread = true)
-	public final Map<Integer, Map<String, ?>> listDetailed() {
-		Map<Integer, Map<String, ?>> result = new HashMap<>();
-		int i = 0;
-		for (BigItemStack entry : blockEntity.getAccurateSummary().getStacks()) {
-			i++;
-			Map<String, Object> details = new HashMap<>(
-					VanillaDetailRegistries.ITEM_STACK.getDetails(entry.stack));
-			details.put("count", entry.count);
-			result.put(i, details);
+	public final Map<String, ?> getItemDetail(int slot) throws LuaException {
+		if (slot < 1) {
+			throw new LuaException("Slot out of range (1 or greater)");
 		}
-		return result;
+
+		List<BigItemStack> stacks = blockEntity.getAccurateSummary().getStacks();
+
+		BigItemStack entry = stacks.get(slot - 1); // Adjust for 0-based list access
+		Map<String, Object> details = new HashMap<>(
+				VanillaDetailRegistries.ITEM_STACK.getDetails(entry.stack));
+		details.put("count", entry.count);
+		return details;
 	}
 
 	/*

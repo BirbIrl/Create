@@ -63,12 +63,8 @@ public class RedstoneRequesterPeripheral extends SyncedPeripheral<RedstoneReques
 	}
 
 	@LuaFunction(mainThread = true)
-	public final void setAddress(Optional<String> argument) throws LuaException {
-		if (argument.isPresent()) {
-			blockEntity.encodedTargetAdress = argument.get();
-		} else {
-			blockEntity.encodedTargetAdress = "";
-		}
+	public final void setAddress(String address) throws LuaException {
+    blockEntity.encodedTargetAdress = address;
 		this.blockEntity.notifyUpdate();
 	}
 

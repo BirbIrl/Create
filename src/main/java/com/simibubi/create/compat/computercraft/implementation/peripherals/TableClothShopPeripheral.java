@@ -45,13 +45,9 @@ public class TableClothShopPeripheral extends SyncedPeripheral<TableClothBlockEn
 	}
 
 	@LuaFunction(mainThread = true)
-	public final void setAddress(Optional<String> argument) throws LuaException {
+	public final void setAddress(String address) throws LuaException {
 		assertShop();
-		if (argument.isPresent())
-			blockEntity.requestData.encodedTargetAdress = argument.get();
-		else
-			blockEntity.requestData.encodedTargetAdress = "";
-
+    blockEntity.requestData.encodedTargetAdress = address;
 	}
 
 	@LuaFunction(mainThread = true)

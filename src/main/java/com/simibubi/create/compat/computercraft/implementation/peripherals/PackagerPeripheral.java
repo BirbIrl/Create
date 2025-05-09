@@ -10,6 +10,7 @@ import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
 
 import com.simibubi.create.content.logistics.BigItemStack;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -42,11 +43,6 @@ public class PackagerPeripheral extends SyncedPeripheral<PackagerBlockEntity> {
 	}
 
 	@LuaFunction(mainThread = true)
-	public final int getItemCount() {
-		return blockEntity.getAvailableItems().getTotalCount();
-	}
-
-	@LuaFunction(mainThread = true)
 	public final boolean makePackage() {
 		if (!blockEntity.heldBox.isEmpty())
 			return false;
@@ -69,6 +65,24 @@ public class PackagerPeripheral extends SyncedPeripheral<PackagerBlockEntity> {
 		}
 		return result;
 	}
+  
+  @LuaFunction(mainThread = true)
+  public final Map<String, ?> getItemDetail(int slot) throws LuaException {
+    List<BigItemStack> stacks = blockEntity.getAvailableItems().getStacks();
+    if (slot < 1) { // All positive can technically be valid
+      throw new LuaException("Slot out of range (1 or greater)");
+    }
+
+    if (slot > stacks.size()) {
+      return null;
+    }
+
+    BigItemStack entry = stacks.get(slot - 1);
+    Map<String, Object> details = new HashMap<>(
+        VanillaDetailRegistries.ITEM_STACK.getDetails(entry.stack));
+    details.put("count", entry.count);
+    return details;
+  }
 
 	@LuaFunction(mainThread = true)
 	public final void setAddress(Optional<String> argument) {
@@ -88,20 +102,6 @@ public class PackagerPeripheral extends SyncedPeripheral<PackagerBlockEntity> {
 	}
 
 	@LuaFunction(mainThread = true)
-	public final Map<Integer, Map<String, ?>> listDetailed() {
-		Map<Integer, Map<String, ?>> result = new HashMap<>();
-		int i = 0;
-		for (BigItemStack entry : blockEntity.getAvailableItems().getStacks()) {
-			i++;
-			Map<String, Object> details = new HashMap<>(
-					VanillaDetailRegistries.ITEM_STACK.getDetails(entry.stack));
-			details.put("count", entry.count);
-			result.put(i, details);
-		}
-		return result;
-	}
-
-	@LuaFunction(mainThread = true)
 	public final boolean setPackageAddress(Optional<String> argument) {
 		if (!blockEntity.heldBox.isEmpty()) {
 			if (argument.isPresent()) {
@@ -115,7 +115,7 @@ public class PackagerPeripheral extends SyncedPeripheral<PackagerBlockEntity> {
 	}
 
 	@LuaFunction(mainThread = true)
-	public final Map<Integer, Map<String, ?>> getPackageItems() throws LuaException {
+	public final Map<Integer, Map<String, ?>> getPackageList() throws LuaException {
 		ItemStack box = blockEntity.heldBox;
 		if (box.isEmpty() && !PackageItem.isPackage(box))
 			return null;
@@ -125,12 +125,31 @@ public class PackagerPeripheral extends SyncedPeripheral<PackagerBlockEntity> {
 			ItemStack stack = results.getStackInSlot(i);
 			if (!stack.isEmpty()) {
 				Map<String, Object> details = new HashMap<>(
-						VanillaDetailRegistries.ITEM_STACK.getDetails(stack));
+						VanillaDetailRegistries.ITEM_STACK.getBasicDetails(stack));
 				result.put(i + 1, details); // +1 because lua
 			}
 		}
 		return result;
 	}
+
+  @LuaFunction(mainThread = true)
+  public final Map<String, ?> getPackageItemDetail(int slot) throws LuaException {
+    ItemStack box = blockEntity.heldBox;
+    if (box.isEmpty() && !PackageItem.isPackage(box)) {
+      return null;
+    }
+
+    if (slot < 1 || slot > PackageItem.SLOTS) {
+      throw new LuaException("Slot out of range (between 1 and " + PackageItem.SLOTS + ")");
+    }
+
+    ItemStackHandler results = PackageItem.getContents(box);
+    ItemStack stack = results.getStackInSlot(slot - 1);
+    if (stack.isEmpty())
+      return null;
+
+    return new HashMap<>(VanillaDetailRegistries.ITEM_STACK.getDetails(stack));
+  }
 
 	@NotNull
 	@Override
