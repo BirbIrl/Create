@@ -62,75 +62,56 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 		return result;
 	}
 
-	/*
-	 * for every item in the netowrk, this will compare that item to the CC args
-	 * filter, a table that looks something like this:
-	 * {
-	 * name = "minecraft:jungle_log",
-	 * tags = {
-	 * ["minecraft:logs"] = true
-	 * },
-	 * count = 5
-	 * },
-	 * and the second optional String arg which is the address:
-	 * "home_address"
-	 * (default value "")
-	 *
-	 * It then adds items that match the name if provided, nbt if provided, have all
-	 * of the tags if provided, has all the enchants if provided and
-	 * stops looking after adding items equal to count or finishing
-	 * going through the summary.
-	 * filter of {} requests all items from the network trollface.jpeg
-	 */
+	// Looks for a list of items and only makes the request if ALL requests are satisfied
+	// Accepts a table structured as:
+	// {
+	// 	{
+	// 		name = "minecraft:stick",
+	// 		count = 16
+	// 	},
+	// 	{
+	// 		name = "minecraft:diamond",
+	// 		count = 4
+	// 	}
+	// }
+	// Second argument is optional and specifies the address to send the items to
+	// The address defaults to ""
 	@LuaFunction(mainThread = true)
-	public final int requestFiltered(IArguments arguments) throws LuaException {
+	public final int request(IArguments arguments) throws LuaException {
 		if (!(arguments.get(0) instanceof Map<?, ?> filterTable))
-			throw new LuaException("Filter must be a table");
+			throw new LuaException("Filter must be an array of items");
 
-    for (Object key : filterTable.keySet())
-      if (!(key instanceof String)) 
-        throw new LuaException("Filter keys must be strings");
+		for (Object key : filterTable.keySet())
+			if (!(key instanceof Double)) throw new LuaException("Filter keys must be doubles (array indecies)");
 
-		@SuppressWarnings("unchecked")
-    Map<String, Object> filter = (Map<String, Object>) filterTable;
-    
-    int itemsRequested = Integer.MAX_VALUE;
-    if (arguments.get(2) instanceof Number) {
-      itemsRequested = ((Number) arguments.get(2)).intValue();
-      if (itemsRequested < 1)
-        throw new LuaException("Count must be a positive number or nil for all");
-    }
-    int itemsSent = 0;
-    
-		String address;
-		// Computercraft has forced my hand to make this dollar store filter algo
+		Map<Double, Map<String, Object>> filters = (Map<Double, Map<String, Object>>) filterTable;
 		List<BigItemStack> validItems = new ArrayList<>();
-		for (BigItemStack entry : blockEntity.getAccurateSummary().getStacks()) {
-      int foundItems = ComputerUtil.bigItemStackToLuaTableFilter(entry, filter);
-			if (foundItems > 0) {
-				int toTake = Math.min(foundItems, itemsRequested);
-        itemsRequested -= toTake;
-        itemsSent += toTake;
-        entry.count = toTake;
-				validItems.add(entry);
-			}
-      if (itemsRequested <= 0) break;
-		}
-		if (arguments.get(1) instanceof String)
-			address = arguments.getString(1);
-		else
-			address = "";
+		int totalItems = 0;
 
+		// For each filter, check if the stack is valid and update counts accordingly
+		List<BigItemStack> stacks = blockEntity.getAccurateSummary().getStacks();
+		for (Map<String, Object> filter : filters.values()) {
+			boolean findAll = !filter.containsKey("count");
+			Integer targetCount = !findAll ? ((Number)filter.get("count")).intValue() : Integer.MAX_VALUE;
+			for (BigItemStack stack : stacks) {
+				int foundItems = ComputerUtil.bigItemStackToLuaTableFilter(stack, filter);
+				if (foundItems > 0) {
+					int toTake = Math.min(foundItems, targetCount);
+					targetCount -= toTake;
+					totalItems += toTake;
+					filter.put("count", targetCount);
+					stack.count = toTake;
+					validItems.add(stack);
+					if (targetCount <= 0) break;
+				}
+			}
+			if (targetCount > 0 && !findAll) return 0; // Target count failed for a filter, so exit the process
+		}
+
+		String address = arguments.get(1) instanceof String ? arguments.getString(1) : "";
 		PackageOrder order = new PackageOrder(validItems);
 		blockEntity.broadcastPackageRequest(RequestType.RESTOCK, order, null, address);
-
-		/*
-		 * CatnipServices.NETWORK
-		 * .sendToServer(new PackageOrderRequestPacket(blockEntity.getBlockPos(), new
-		 * PackageOrder(itemsToOrder),
-		 * address, false, new PackageOrder(stacks);
-		 */
-		return itemsSent;
+		return totalItems;
 	}
 
 	@LuaFunction(mainThread = true)

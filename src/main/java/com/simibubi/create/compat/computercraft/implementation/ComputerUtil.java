@@ -21,7 +21,7 @@ public class ComputerUtil {
 
     Map<String,Object> details =
       new HashMap<>(VanillaDetailRegistries.ITEM_STACK.getDetails(entry.stack));
-    //details.put("count", entry.count);
+    details.put("count", filter.containsKey("count") ? ((Number) filter.get("count")).intValue() : entry.count);
 
     // If name is in filter and doesn't have : in it add minecraft: namespace
     if (filter.containsKey("name") && filter.get("name") instanceof String name) {
