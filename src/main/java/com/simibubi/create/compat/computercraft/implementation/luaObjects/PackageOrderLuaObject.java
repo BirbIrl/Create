@@ -134,13 +134,13 @@ public class PackageOrderLuaObject implements LuaComparable {
     return crafts;
   }
   
-  public final List<LuaItemStack> getLuaItemStacks() {
-    List<LuaItemStack> result = new ArrayList<>();
+  public final List<LuaBigItemStack> getLuaItemStacks() {
+    List<LuaBigItemStack> result = new ArrayList<>();
 
     for (BigItemStack bis : context.stacks()) {
       ItemStack stack = bis.stack;
       if (!stack.isEmpty()) {
-        result.add(new LuaItemStack(stack));
+        result.add(new LuaBigItemStack(bis));
       }
     }
     return result;
