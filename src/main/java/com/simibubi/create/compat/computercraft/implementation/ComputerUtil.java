@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import com.simibubi.create.Create;
 import com.simibubi.create.compat.computercraft.implementation.luaObjects.LuaComparable;
 import com.simibubi.create.content.logistics.BigItemStack;
 
@@ -100,9 +99,11 @@ public class ComputerUtil {
           case "table" -> iVal instanceof Map<?, ?> || iVal instanceof List<?>;
           case "list" -> iVal instanceof List<?>;  // Additional check for list
           case "map" -> iVal instanceof Map<?, ?>; // Additional check for map
+          case "object" -> iVal instanceof LuaComparable; // For compatible objects
           default -> throw new LuaException("Unknown type: " + type);
         };
       }
+
       // Number comparison
       if (iVal instanceof Number in && fValue instanceof Number val)
         return switch (op) {
@@ -115,15 +116,9 @@ public class ComputerUtil {
           default   -> throw new LuaException("Unknown operator: " + op);
         };
       
-      // String comparison
+      // String matching
       if (iVal instanceof String inStr && fValue instanceof String fStr) {
         return switch (op) {
-          case "==" -> inStr.equals(fStr);
-          case "~=" -> !inStr.equals(fStr);
-          case ">"  -> inStr.compareTo(fStr) > 0;
-          case ">=" -> inStr.compareTo(fStr) >= 0;
-          case "<"  -> inStr.compareTo(fStr) < 0;
-          case "<=" -> inStr.compareTo(fStr) <= 0;
           case "glob" -> inStr.matches(Glob.toRegexPattern(fStr, ""));
           case "regex" -> inStr.matches(fStr);
           default   -> throw new LuaException("Unknown operator: " + op);
