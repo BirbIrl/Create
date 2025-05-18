@@ -8,20 +8,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import com.simibubi.create.Create;
 import com.simibubi.create.compat.computercraft.implementation.luaObjects.LuaComparable;
 import com.simibubi.create.content.logistics.BigItemStack;
 
 import dan200.computercraft.api.detail.VanillaDetailRegistries;
 import dan200.computercraft.api.lua.LuaException;
 import net.minecraftforge.items.IItemHandler;
+import net.createmod.catnip.data.Glob;
 
 public class ComputerUtil {
 
-  public static int bigItemStackToLuaTableFilter(BigItemStack entry, Map<String,Object> filter) throws LuaException {
+  public static int bigItemStackToLuaTableFilter(BigItemStack entry, Map<?,?> filter) throws LuaException {
 
-    Map<String,Object> details =
-      new HashMap<>(VanillaDetailRegistries.ITEM_STACK.getDetails(entry.stack));
-    //details.put("count", entry.count);
+    Map<String,Object> details = VanillaDetailRegistries.ITEM_STACK.getDetails(entry.stack);
+
+    // Count needs to be replaced because BigItemStack can have a different count than the stack
+    details.put("count", entry.count);
 
     // If name is in filter and doesn't have : in it add minecraft: namespace
     if (filter.containsKey("name") && filter.get("name") instanceof String name) {
@@ -30,17 +33,13 @@ public class ComputerUtil {
       }
     }
 
-    // If filter is a list, check if the item is in the list
-    if (!(filter instanceof Map<?,?>)) 
-      throw new LuaException("Filter must be a map");
-
     if (!deepEquals(filter, details))
       return 0;
     return entry.count;
   }
 
   private static boolean deepEquals(Object fVal, Object iVal) throws LuaException {
-    // Checks all non number, Map, and List types
+    // Checks all String, Number, Boolean and null values
     if (Objects.equals(iVal, fVal)) return true;
 
     // Lua Objects can implement LuaComparable to provide a table representation for lazy filtering
@@ -51,6 +50,89 @@ public class ComputerUtil {
     // If both are numbers, compare them as doubles because lua numbers are always doubles
     if (fVal instanceof Number fn && iVal instanceof Number in)
       return Double.compare(fn.doubleValue(), in.doubleValue()) == 0;
+
+    // Other comparisons for Not, Type, Numbers, and Strings
+    // Example: count = { "_op": ">=", "value": 10 }
+    if (fVal instanceof Map<?, ?> fMap && fMap.get("_op") instanceof String op &&
+        fMap.get("value") != null) {
+      // Value to use operator on
+      Object fValue = fMap.get("value");
+
+      // Not operator
+      if (op.equals("not")) {
+        return !deepEquals(fValue, iVal);
+      }
+      
+      // Any / All operator
+      if (op.equals("any") || op.equals("all")) {
+        final String errorMsg = op + " operator requires a list of values";
+        
+        if (!(fValue instanceof Map<?,?> valueMap)) 
+          throw new LuaException(errorMsg);
+        
+        List<?> values = toOrderedList(valueMap);
+        if (values == null) 
+          throw new LuaException(errorMsg);
+
+        boolean isAll = op.equals("all");
+        for (Object v : values) {
+          boolean match = deepEquals(v, iVal);
+          if (isAll) {
+            if (!match) return false;
+          } else {
+            if (match) return true;
+          }
+        }
+        return isAll;
+      }
+
+      // Type operator
+      if (op.equals("type")) {
+        if (!(fValue instanceof String type)) {
+          throw new LuaException("Type operator requires a string value");
+        }
+        if (iVal == null) return type.equals("nil");
+        return switch (type) {
+          case "nil" -> iVal == null;
+          case "number" -> iVal instanceof Number;
+          case "string" -> iVal instanceof String;
+          case "boolean" -> iVal instanceof Boolean;
+          case "table" -> iVal instanceof Map<?, ?> || iVal instanceof List<?>;
+          case "list" -> iVal instanceof List<?>;  // Additional check for list
+          case "map" -> iVal instanceof Map<?, ?>; // Additional check for map
+          default -> throw new LuaException("Unknown type: " + type);
+        };
+      }
+      // Number comparison
+      if (iVal instanceof Number in && fValue instanceof Number val)
+        return switch (op) {
+          case ">"  -> in.doubleValue() > val.doubleValue();
+          case ">=" -> in.doubleValue() >= val.doubleValue();
+          case "<"  -> in.doubleValue() < val.doubleValue();
+          case "<=" -> in.doubleValue() <= val.doubleValue();
+          case "==" -> in.doubleValue() == val.doubleValue();
+          case "~=" -> in.doubleValue() != val.doubleValue();
+          default   -> throw new LuaException("Unknown operator: " + op);
+        };
+      
+      // String comparison
+      if (iVal instanceof String inStr && fValue instanceof String fStr) {
+        return switch (op) {
+          case "==" -> inStr.equals(fStr);
+          case "~=" -> !inStr.equals(fStr);
+          case ">"  -> inStr.compareTo(fStr) > 0;
+          case ">=" -> inStr.compareTo(fStr) >= 0;
+          case "<"  -> inStr.compareTo(fStr) < 0;
+          case "<=" -> inStr.compareTo(fStr) <= 0;
+          case "glob" -> inStr.matches(Glob.toRegexPattern(fStr, ""));
+          case "regex" -> inStr.matches(fStr);
+          default   -> throw new LuaException("Unknown operator: " + op);
+        };
+      }
+
+      throw new LuaException("Operator " + op + " not supported for type " + 
+        (fValue == null ? "null" : fValue.getClass().getSimpleName()));
+    }
 
     // Convert to collections
     Collection fColl = Collection.of(fVal);
@@ -139,11 +221,9 @@ public class ComputerUtil {
       if (o instanceof Map<?,?> m) {
         MatchMode mode = MatchMode.parse(m.get("_mode"));
         m.remove("_mode");
-        if (isArrayLike(m)) {
-          List<Object> lst = toOrderedList(m);
-          return new Collection(mode, lst, m);
-        }
-        return new Collection(mode, null, m);
+        // Null if not an array-like map
+        List<Object> lst = toOrderedList(m);
+        return new Collection(mode, lst, m);
       }
       // List for CC, never from filter
       if (o instanceof List<?> raw) {
@@ -191,6 +271,9 @@ public class ComputerUtil {
   }
 
   private static List<Object> toOrderedList(Map<?,?> m) {
+    if (!isArrayLike(m)) {
+      return null;
+    }
     int n = m.size();
     List<Object> out = new ArrayList<>(Collections.nCopies(n, null));
     for (var e : m.entrySet())
