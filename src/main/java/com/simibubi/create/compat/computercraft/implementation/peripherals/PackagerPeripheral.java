@@ -7,11 +7,13 @@ import java.util.Optional;
 
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.items.ItemStackHandler;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.simibubi.create.compat.computercraft.implementation.luaObjects.PackageLuaObject;
 import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
+import com.simibubi.create.content.logistics.box.PackageItem;
 import com.simibubi.create.content.logistics.BigItemStack;
 
 import dan200.computercraft.api.lua.LuaFunction;
@@ -49,7 +51,7 @@ public class PackagerPeripheral extends SyncedPeripheral<PackagerBlockEntity> {
 			return false;
 		return true;
 	}
-  
+
 	@LuaFunction(mainThread = true)
 	public final Map<Integer, Map<String, ?>> list() {
 		Map<Integer, Map<String, ?>> result = new HashMap<>();
@@ -63,24 +65,6 @@ public class PackagerPeripheral extends SyncedPeripheral<PackagerBlockEntity> {
 		}
 		return result;
 	}
-  
-  @LuaFunction(mainThread = true)
-  public final Map<String, ?> getItemDetail(int slot) throws LuaException {
-    List<BigItemStack> stacks = blockEntity.getAvailableItems().getStacks();
-    if (slot < 1) { // All positive can technically be valid
-      throw new LuaException("Slot out of range (1 or greater)");
-    }
-
-    if (slot > stacks.size()) {
-      return null;
-    }
-
-    BigItemStack entry = stacks.get(slot - 1);
-    Map<String, Object> details = new HashMap<>(
-        VanillaDetailRegistries.ITEM_STACK.getDetails(entry.stack));
-    details.put("count", entry.count);
-    return details;
-  }
 
   @LuaFunction(mainThread = true)
   public final Map<String, ?> getItemDetail(int slot) throws LuaException {
@@ -99,7 +83,8 @@ public class PackagerPeripheral extends SyncedPeripheral<PackagerBlockEntity> {
     details.put("count", entry.count);
     return details;
   }
-  
+
+
 	@LuaFunction(mainThread = true)
 	public final String getAddress() {
 		return blockEntity.signBasedAddress;
@@ -124,7 +109,7 @@ public class PackagerPeripheral extends SyncedPeripheral<PackagerBlockEntity> {
       return null;
     return new PackageLuaObject(blockEntity, box);
   }
-  
+
 	@LuaFunction(mainThread = true)
 	public final boolean setPackageAddress(Optional<String> argument) {
 		if (!blockEntity.heldBox.isEmpty()) {
