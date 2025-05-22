@@ -510,7 +510,7 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 		notifyUpdate();
 	}
 
-	protected void updateSignAddress() {
+	public void updateSignAddress() {
 		signBasedAddress = "";
 		for (Direction side : Iterate.directions) {
 			String address = getSign(side);

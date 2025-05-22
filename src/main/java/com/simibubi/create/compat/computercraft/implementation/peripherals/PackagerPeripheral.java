@@ -85,6 +85,7 @@ public class PackagerPeripheral extends SyncedPeripheral<PackagerBlockEntity> {
 
 	@LuaFunction(mainThread = true)
 	public final String getAddress() {
+		blockEntity.updateSignAddress();
 		return blockEntity.signBasedAddress;
 	}
 
