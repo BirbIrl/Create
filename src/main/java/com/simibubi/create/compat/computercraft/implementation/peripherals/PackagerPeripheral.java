@@ -63,6 +63,24 @@ public class PackagerPeripheral extends SyncedPeripheral<PackagerBlockEntity> {
 		}
 		return result;
 	}
+  
+  @LuaFunction(mainThread = true)
+  public final Map<String, ?> getItemDetail(int slot) throws LuaException {
+    List<BigItemStack> stacks = blockEntity.getAvailableItems().getStacks();
+    if (slot < 1) { // All positive can technically be valid
+      throw new LuaException("Slot out of range (1 or greater)");
+    }
+
+    if (slot > stacks.size()) {
+      return null;
+    }
+
+    BigItemStack entry = stacks.get(slot - 1);
+    Map<String, Object> details = new HashMap<>(
+        VanillaDetailRegistries.ITEM_STACK.getDetails(entry.stack));
+    details.put("count", entry.count);
+    return details;
+  }
 
   @LuaFunction(mainThread = true)
   public final Map<String, ?> getItemDetail(int slot) throws LuaException {
@@ -104,8 +122,57 @@ public class PackagerPeripheral extends SyncedPeripheral<PackagerBlockEntity> {
     ItemStack box = blockEntity.heldBox;
     if (box.isEmpty())
       return null;
-
     return new PackageLuaObject(blockEntity, box);
+  }
+  
+	@LuaFunction(mainThread = true)
+	public final boolean setPackageAddress(Optional<String> argument) {
+		if (!blockEntity.heldBox.isEmpty()) {
+			if (argument.isPresent()) {
+				PackageItem.addAddress(blockEntity.heldBox, argument.get());
+			} else {
+				PackageItem.addAddress(blockEntity.heldBox, "");
+			}
+			return true;
+		}
+		return false;
+	}
+
+	@LuaFunction(mainThread = true)
+	public final Map<Integer, Map<String, ?>> getPackageList() throws LuaException {
+		ItemStack box = blockEntity.heldBox;
+		if (box.isEmpty() && !PackageItem.isPackage(box))
+			return null;
+		ItemStackHandler results = PackageItem.getContents(box);
+		Map<Integer, Map<String, ?>> result = new HashMap<>();
+		for (int i = 0; i < results.getSlots(); i++) {
+			ItemStack stack = results.getStackInSlot(i);
+			if (!stack.isEmpty()) {
+				Map<String, Object> details = new HashMap<>(
+						VanillaDetailRegistries.ITEM_STACK.getBasicDetails(stack));
+				result.put(i + 1, details); // +1 because lua
+			}
+		}
+		return result;
+	}
+
+  @LuaFunction(mainThread = true)
+  public final Map<String, ?> getPackageItemDetail(int slot) throws LuaException {
+    ItemStack box = blockEntity.heldBox;
+    if (box.isEmpty() && !PackageItem.isPackage(box)) {
+      return null;
+    }
+
+    if (slot < 1 || slot > PackageItem.SLOTS) {
+      throw new LuaException("Slot out of range (between 1 and " + PackageItem.SLOTS + ")");
+    }
+
+    ItemStackHandler results = PackageItem.getContents(box);
+    ItemStack stack = results.getStackInSlot(slot - 1);
+    if (stack.isEmpty())
+      return null;
+
+    return new HashMap<>(VanillaDetailRegistries.ITEM_STACK.getDetails(stack));
   }
 
 	@NotNull
