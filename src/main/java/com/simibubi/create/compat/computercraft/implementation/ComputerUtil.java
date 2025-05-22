@@ -1,165 +1,281 @@
 package com.simibubi.create.compat.computercraft.implementation;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
 
+import com.simibubi.create.compat.computercraft.implementation.luaObjects.LuaComparable;
 import com.simibubi.create.content.logistics.BigItemStack;
 
 import dan200.computercraft.api.detail.VanillaDetailRegistries;
 import dan200.computercraft.api.lua.LuaException;
-
-import net.minecraft.world.item.ItemStack;
-
 import net.minecraftforge.items.IItemHandler;
-
-import org.jetbrains.annotations.NotNull;
+import net.createmod.catnip.data.Glob;
 
 public class ComputerUtil {
 
-	// tldr: the computercraft api lets you parse items into lua-like-tables that cc
-	// uses for all it's items. to keep consistency with the rest of the inventory
-	// api in other parts of the mod i must do this terribleness. i am sorry.
-	public static int bigItemStackToLuaTableFilter(BigItemStack entry, Map<?, ?> filter) throws LuaException {
-		Map<String, Object> details = new HashMap<>(
-				VanillaDetailRegistries.ITEM_STACK.getDetails(entry.stack));
-		details.put("count", entry.count);
-		if (filter.containsKey("name"))
-			if (filter.get("name") instanceof String) {
-				String filterName = (String) filter.get("name");
-				if (!filterName.contains(":"))
-					filterName = "minecraft:" + filterName;
-				if (!filterName.equals(details.get("name")))
-					return 0;
-			} else {
-				throw new LuaException("Name must be a string");
-			}
-		// check the easy types
-		Map<String, Class<?>> expectedTypes = new HashMap<>();
-		expectedTypes.put("displayName", String.class);
-		expectedTypes.put("nbt", String.class);
-		expectedTypes.put("damage", Double.class);
-		expectedTypes.put("durability", Double.class);
-		expectedTypes.put("maxDamage", Double.class);
-		expectedTypes.put("maxCount", Double.class);
-		for (String key : expectedTypes.keySet()) {
-			if (filter.containsKey(key)) {
-				Object filterValue = filter.get(key);
-				Class<?> expectedType = expectedTypes.get(key);
-				if (expectedType.isInstance(filterValue)) {
-					Object detailsValue = details.get(key);
-					// some of these values are ints sometimes :tf:
-					if (expectedType == Double.class && detailsValue instanceof Number) {
-						detailsValue = ((Number) detailsValue).doubleValue();
-					}
-					if (!details.containsKey(key) || !filterValue.equals(detailsValue)) {
-						return 0;
-					}
-				} else {
-					throw new LuaException(key + " must be a " + expectedType.getSimpleName());
-				}
-			}
-		}
-		// java types dont mix well with lua tables at all
-		if (filter.containsKey("tags")) {
-			Object filterTagsObject = filter.get("tags");
-			Object itemTagsObject = details.get("tags");
-			if (filterTagsObject instanceof Map<?, ?> && itemTagsObject instanceof Map<?, ?>) {
-				@SuppressWarnings("unchecked")
-				Map<String, Boolean> filterTags = (Map<String, Boolean>) filterTagsObject;
-				@SuppressWarnings("unchecked")
-				Map<String, Boolean> itemTags = (Map<String, Boolean>) itemTagsObject;
-				for (Map.Entry<String, Boolean> filterTagEntry : filterTags.entrySet()) {
-					if (!(filterTagEntry.getValue() instanceof Boolean)) {
-						throw new LuaException(
-							"Tags filter must be a table of tags like: \n{tags = { \n	[\"minecraft:logs\"] = true} \n	{diamonds = true}\n}}");
-					}
-					int filterMatches = 0;
-					for (Map.Entry<String, Boolean> itemTagEntry : itemTags.entrySet()) {
-						if (itemTagEntry.getKey().equals(filterTagEntry.getKey())) {
-							filterMatches++;
-						}
-					}
-					if (filterMatches == 0) {
-						return 0;
-					}
-				}
-			} else {
-				return 0;
-			}
-		}
-		// avert your eyes, it only gets worse. When the computercraft api fetches
-		// enchants of an item, it's an array list. when you submit a table from within
-		// computercraft as an argument, it's always a hash map. Handling the mix of
-		// both instead of converting because i felt like it's a good idea
-		if (filter.containsKey("enchantments")) {
-			Object filterEnchantmentsObject = filter.get("enchantments"); // HashMap
-			Object itemEnchantmentsObject = details.get("enchantments"); // ArrayList
-			// i might be doing a major skill issue here, idk i mainly do development in lua
-			if (filterEnchantmentsObject instanceof Map<?, ?> && itemEnchantmentsObject instanceof ArrayList<?>) {
-				@SuppressWarnings("unchecked")
-				Map<String, Map<String, ?>> filterEnchantments = (Map<String, Map<String, ?>>) filterEnchantmentsObject;
-				@SuppressWarnings("unchecked")
-				ArrayList<HashMap<String, ?>> itemEnchantments = (ArrayList<HashMap<String, ?>>) itemEnchantmentsObject;
-				if (filterEnchantments.size() != itemEnchantments.size())
-					return 0;
-				Set<HashMap<String, ?>> matchedItemEnchantments = new HashSet<>();
-				for (Map.Entry<String, ?> filterEnchantmentNode : filterEnchantments.entrySet()) {
-					int filterMatches = 0;
-					if (!(filterEnchantmentNode.getValue() instanceof Map<?, ?>)) {
-						throw new LuaException(
-							"Enchantments filter must be a table of enchant information like: \n{enchantments = { \n	{name = \"minecraft:sharpness\"} \n	{name = \"minecraft:protection\" \n level = 1\n	}\n}}");
-					}
-					@SuppressWarnings("unchecked")
-					Map<String, ?> filterEnchantmentEntry = (Map<String, ?>) (filterEnchantmentNode.getValue());
-					String filterEnchantmentName = (String) (filterEnchantmentEntry.get("name"));
-					String filterEnchantmentDisplayName = (String) (filterEnchantmentEntry.get("displayName"));
-					Double filterEnchantmentLevel = 0.0;
-					boolean CheckEnchantmentName = false;
-					boolean CheckEnchantmentDisplayName = false;
-					boolean CheckEnchantmentLevel = false;
-					if (filterEnchantmentEntry.get("level") instanceof Double) {
-						filterEnchantmentLevel = (Double) (filterEnchantmentEntry.get("level"));
-						CheckEnchantmentLevel = true;
-					}
-					if (filterEnchantmentEntry.get("name") instanceof String) {
-						filterEnchantmentName = (String) (filterEnchantmentEntry.get("name"));
-						CheckEnchantmentName = true;
-					}
-					if (filterEnchantmentEntry.get("displayName") instanceof String) {
-						filterEnchantmentDisplayName = (String) (filterEnchantmentEntry.get("displayName"));
-						CheckEnchantmentDisplayName = true;
-					}
-					for (HashMap<String, ?> itemEnchantmentEntry : itemEnchantments) {
-						String itemEnchantmentName = (String) itemEnchantmentEntry.get("name");
-						String itemEnchantmentDisplayName = (String) (itemEnchantmentEntry.get("displayName"));
-						Integer itemEnchantmentLevel = (Integer) (itemEnchantmentEntry.get("level"));
+  public static int bigItemStackToLuaTableFilter(BigItemStack entry, Map<?,?> filter) throws LuaException {
 
-						if (!matchedItemEnchantments.contains(itemEnchantmentEntry)
-							&& (!CheckEnchantmentName || itemEnchantmentName.equals(filterEnchantmentName))
-							&& (!CheckEnchantmentDisplayName
-							|| (itemEnchantmentDisplayName.equals(filterEnchantmentDisplayName)))
-							&& (!CheckEnchantmentLevel
-							|| (itemEnchantmentLevel
-							.doubleValue()) == filterEnchantmentLevel)) {
-							matchedItemEnchantments.add(itemEnchantmentEntry); // one itemenchant per filter
-							filterMatches++;
-						}
-					}
-					if (filterMatches == 0) {
-						return 0;
-					}
-				}
-			} else {
-				return 0;
-			}
-		}
-		return entry.count;
+    Map<String,Object> details = VanillaDetailRegistries.ITEM_STACK.getDetails(entry.stack);
 
-	}
+    // Count needs to be replaced because BigItemStack can have a different count than the stack
+    details.put("count", entry.count);
 
+    // If name is in filter and doesn't have : in it add minecraft: namespace
+    if (filter.containsKey("name") && filter.get("name") instanceof String name) {
+      if (!name.contains(":")) {
+        details.put("name", "minecraft:" + name);
+      }
+    }
+
+    if (!deepEquals(filter, details))
+      return 0;
+    return entry.count;
+  }
+
+  private static boolean deepEquals(Object fVal, Object iVal) throws LuaException {
+    // Checks all String, Number, Boolean and null values
+    if (Objects.equals(iVal, fVal)) return true;
+
+    // Lua Objects can implement LuaComparable to provide a table representation for lazy filtering
+    if (iVal instanceof LuaComparable iStack) {
+      return deepEquals(fVal, iStack.getTableRepresentation());
+    } 
+
+    // If both are numbers, compare them as doubles because lua numbers are always doubles
+    if (fVal instanceof Number fn && iVal instanceof Number in)
+      return Double.compare(fn.doubleValue(), in.doubleValue()) == 0;
+
+    // Other comparisons for Not, Type, Numbers, and Strings
+    // Example: count = { "_op": ">=", "value": 10 }
+    if (fVal instanceof Map<?, ?> fMap && fMap.get("_op") instanceof String op &&
+        fMap.get("value") != null) {
+      // Value to use operator on
+      Object fValue = fMap.get("value");
+
+      // Not operator
+      if (op.equals("not")) {
+        return !deepEquals(fValue, iVal);
+      }
+      
+      // Any / All operator
+      if (op.equals("any") || op.equals("all")) {
+        final String errorMsg = op + " operator requires a list of values";
+        
+        if (!(fValue instanceof Map<?,?> valueMap)) 
+          throw new LuaException(errorMsg);
+        
+        List<?> values = toOrderedList(valueMap);
+        if (values == null) 
+          throw new LuaException(errorMsg);
+
+        boolean isAll = op.equals("all");
+        for (Object v : values) {
+          boolean match = deepEquals(v, iVal);
+          if (isAll) {
+            if (!match) return false;
+          } else {
+            if (match) return true;
+          }
+        }
+        return isAll;
+      }
+
+      // Type operator
+      if (op.equals("type")) {
+        if (!(fValue instanceof String type)) {
+          throw new LuaException("Type operator requires a string value");
+        }
+        if (iVal == null) return type.equals("nil");
+        return switch (type) {
+          case "nil" -> iVal == null;
+          case "number" -> iVal instanceof Number;
+          case "string" -> iVal instanceof String;
+          case "boolean" -> iVal instanceof Boolean;
+          case "table" -> iVal instanceof Map<?, ?> || iVal instanceof List<?>;
+          case "list" -> iVal instanceof List<?>;  // Additional check for list
+          case "map" -> iVal instanceof Map<?, ?>; // Additional check for map
+          case "object" -> iVal instanceof LuaComparable; // For compatible objects
+          default -> throw new LuaException("Unknown type: " + type);
+        };
+      }
+
+      // Number comparison
+      if (iVal instanceof Number in && fValue instanceof Number val)
+        return switch (op) {
+          case ">"  -> in.doubleValue() > val.doubleValue();
+          case ">=" -> in.doubleValue() >= val.doubleValue();
+          case "<"  -> in.doubleValue() < val.doubleValue();
+          case "<=" -> in.doubleValue() <= val.doubleValue();
+          case "==" -> in.doubleValue() == val.doubleValue();
+          case "~=" -> in.doubleValue() != val.doubleValue();
+          default   -> throw new LuaException("Unknown operator: " + op);
+        };
+      
+      // String matching
+      if (iVal instanceof String inStr && fValue instanceof String fStr) {
+        return switch (op) {
+          case "glob" -> inStr.matches(Glob.toRegexPattern(fStr, ""));
+          case "regex" -> inStr.matches(fStr);
+          default   -> throw new LuaException("Unknown operator: " + op);
+        };
+      }
+
+      throw new LuaException("Operator " + op + " not supported for type " + 
+        (fValue == null ? "null" : fValue.getClass().getSimpleName()));
+    }
+
+    // Convert to collections
+    Collection fColl = Collection.of(fVal);
+    Collection iColl = Collection.of(iVal);
+    // If one is not a collection, return false
+    if (fColl == null || iColl == null)
+      return false;
+    
+    // Compare as list or map
+    if (iColl.isList() && fColl.isList()) return matchList(fColl, iColl);
+    if (iColl.isMap()  && fColl.isMap())  return matchMap (fColl, iColl);
+    return false;                                         
+  }
+
+  private static boolean matchList(Collection f, Collection i) throws LuaException {
+    switch (f.mode) {
+      case EXACT -> {
+        if (f.list.size() != i.list.size()) return false;
+        for (int k = 0; k < f.list.size(); k++)
+          if (!deepEquals(f.list.get(k), i.list.get(k))) 
+            return false;
+        return true;
+      }
+      case CONTAINS   -> {
+        outer: for (Object fVal : f.list) {
+          for (Iterator<?> it = i.list.iterator(); it.hasNext();) {
+            Object iVal = it.next();
+            if (deepEquals(fVal, iVal)) { it.remove(); continue outer; }
+          }
+          return false;
+        }
+        return true;
+      }
+      case CONTAINED  -> 
+      {
+        outer: for (Object iVal : i.list) {
+          for (Iterator<?> it = f.list.iterator(); it.hasNext();) {
+            Object fVal = it.next();
+            if (deepEquals(fVal, iVal)) { it.remove(); continue outer; }
+          }
+          return false;
+        }
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static boolean matchMap(Collection f, Collection i) throws LuaException {
+    switch (f.mode) {
+      case EXACT -> {
+        if (!f.map.keySet().equals(i.map.keySet())) return false;
+        for (var e : f.map.entrySet()) {
+          if (!deepEquals(e.getValue(), i.map.get(e.getKey())))
+            return false;
+        }
+        return true;
+      }
+      case CONTAINS -> {
+        for (var e : f.map.entrySet()) {
+          if (!i.map.containsKey(e.getKey())
+              || !deepEquals(e.getValue(), i.map.get(e.getKey())))
+            return false;
+        }
+        return true;
+      }
+      case CONTAINED -> {
+        for (var e : i.map.entrySet()) {
+          if (!f.map.containsKey(e.getKey())
+              || !deepEquals(f.map.get(e.getKey()), e.getValue()))
+            return false;
+        }
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Is a wrapper for lua tables so they can be processed as lists or maps
+  private record Collection(MatchMode mode, List<?> list, Map<?, ?> map) {
+    boolean isList() { return list != null; }
+    boolean isMap()  { return map != null; }
+
+    // Returns null if not a list or map
+    static Collection of(Object o) throws LuaException {
+      if (o instanceof Map<?,?> m) {
+        MatchMode mode = MatchMode.parse(m.get("_mode"));
+        m.remove("_mode");
+        // Null if not an array-like map
+        List<Object> lst = toOrderedList(m);
+        return new Collection(mode, lst, m);
+      }
+      // List for CC, never from filter
+      if (o instanceof List<?> raw) {
+        return new Collection(MatchMode.CONTAINS, raw, null);
+      }
+      return null;
+    }
+  }
+
+  // Allows user to specify match mode in filter for the specific list or map
+  // Exact: 1:1 match, list must be same size and order
+  // Contains: All elements in filter must be in the item, order doesn't matter, args removed from filter as they are found
+  // Contained: All elements in item must be in the filter, order doesn't matter, args removed from item as they are found
+  private enum MatchMode { EXACT, CONTAINS, CONTAINED;
+    static MatchMode parse(Object t) throws LuaException {
+      if (!(t instanceof String s)) return CONTAINS;
+      return switch (s.toLowerCase()) {
+        case "exact"     -> EXACT;
+        case "contains"  -> CONTAINS;
+        case "contained" -> CONTAINED;
+        default          -> throw new LuaException(
+          "Invalid match mode: " + s + ", expected 'exact', 'contained' or 'contains'");
+      };
+    }
+  }
+
+  // All arrays from lua are passed as maps so we check if it is an array-like map
+  private static boolean isArrayLike(Map<?,?> map) {
+    int n = map.size();
+    if (n == 0) return true;
+
+    boolean[] seen = new boolean[n];
+    for (Object keyObj : map.keySet()) {
+      if (!(keyObj instanceof Number)) return false;
+      int k = ((Number) keyObj).intValue() - 1;
+      if (k != Math.floor(k)) return false; // not an whole number
+      if (k < 0 || k >= n || seen[k]) return false;
+      seen[k] = true;
+    }
+
+    for (boolean ok : seen)  
+      if (!ok) return false;
+
+    return true;
+  }
+
+  private static List<Object> toOrderedList(Map<?,?> m) {
+    if (!isArrayLike(m)) {
+      return null;
+    }
+    int n = m.size();
+    List<Object> out = new ArrayList<>(Collections.nCopies(n, null));
+    for (var e : m.entrySet())
+      out.set(((Number) e.getKey()).intValue() - 1, e.getValue());
+    return out;
+  }
+  
 	public static Map<Integer, Map<String, ?>> list(IItemHandler inventory) {
 		Map<Integer, Map<String, ?>> result = new HashMap<>();
 		var size = inventory.getSlots();

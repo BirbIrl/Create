@@ -1,6 +1,8 @@
 package com.simibubi.create.compat.computercraft.implementation;
 
 import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
+import com.simibubi.create.compat.computercraft.implementation.luaObjects.PackageLuaObject;
+import com.simibubi.create.compat.computercraft.implementation.luaObjects.PackageOrderLuaObject;
 import com.simibubi.create.compat.computercraft.implementation.peripherals.DisplayLinkPeripheral;
 import com.simibubi.create.compat.computercraft.implementation.peripherals.FrogportPeripheral;
 import com.simibubi.create.compat.computercraft.implementation.peripherals.PostboxPeripheral;
@@ -13,12 +15,14 @@ import com.simibubi.create.compat.computercraft.implementation.peripherals.Stres
 import com.simibubi.create.compat.computercraft.implementation.peripherals.StockTickerPeripheral;
 import com.simibubi.create.compat.computercraft.implementation.peripherals.PackagerPeripheral;
 import com.simibubi.create.compat.computercraft.implementation.peripherals.TableClothShopPeripheral;
+import com.simibubi.create.content.logistics.box.PackageItem;
 import com.simibubi.create.content.logistics.packagePort.frogport.FrogportBlockEntity;
 import com.simibubi.create.content.logistics.packagePort.postbox.PostboxBlockEntity;
 import com.simibubi.create.compat.computercraft.implementation.peripherals.RedstoneRequesterPeripheral;
 import com.simibubi.create.content.logistics.packager.repackager.RepackagerBlockEntity;
 import com.simibubi.create.content.logistics.redstoneRequester.RedstoneRequesterBlockEntity;
 import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
+import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts;
 import com.simibubi.create.content.logistics.stockTicker.StockTickerBlockEntity;
 import com.simibubi.create.content.kinetics.gauge.SpeedGaugeBlockEntity;
 import com.simibubi.create.content.kinetics.gauge.StressGaugeBlockEntity;
@@ -30,6 +34,8 @@ import com.simibubi.create.content.trains.station.StationBlockEntity;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 
 import dan200.computercraft.api.peripheral.IPeripheral;
+import dan200.computercraft.api.detail.VanillaDetailRegistries;
+import dan200.computercraft.api.lua.LuaException;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.CapabilityToken;
@@ -82,6 +88,16 @@ public class ComputerBehaviour extends AbstractComputerBehaviour {
 		throw new IllegalArgumentException(
 			"No peripheral available for " + ForgeRegistries.BLOCK_ENTITY_TYPES.getKey(be.getType()));
 	}
+
+  public static void registerItemDetailProviders() {
+    VanillaDetailRegistries.ITEM_STACK.addProvider((out, stack) -> {
+      if (PackageItem.isPackage(stack))
+      {
+        PackageLuaObject packageLuaObject = new PackageLuaObject(null, stack);
+        out.put("package", packageLuaObject);
+      }
+    });
+  }
 
 	@Override
 	public <T> boolean isPeripheralCap(Capability<T> cap) {
