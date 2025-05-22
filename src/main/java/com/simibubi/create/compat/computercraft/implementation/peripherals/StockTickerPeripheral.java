@@ -45,18 +45,17 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 	}
 
 	@LuaFunction(mainThread = true)
-	public final Map<String, ?> getItemDetail(int slot) throws LuaException {
-		if (slot < 1) {
-			throw new LuaException("Slot out of range (1 or greater)");
+	public final Map<Integer, Map<String, ?>> listDetailed() {
+		Map<Integer, Map<String, ?>> result = new HashMap<>();
+		int i = 0;
+		for (BigItemStack entry : blockEntity.getAccurateSummary().getStacks()) {
+			i++;
+			Map<String, Object> details = new HashMap<>(
+					VanillaDetailRegistries.ITEM_STACK.getDetails(entry.stack));
+			details.put("count", entry.count);
+			result.put(i, details);
 		}
-
-		List<BigItemStack> stacks = blockEntity.getAccurateSummary().getStacks();
-
-		BigItemStack entry = stacks.get(slot - 1); // Adjust for 0-based list access
-		Map<String, Object> details = new HashMap<>(
-				VanillaDetailRegistries.ITEM_STACK.getDetails(entry.stack));
-		details.put("count", entry.count);
-		return details;
+		return result;
 	}
 
 	/*
@@ -84,34 +83,35 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 		if (!(arguments.get(0) instanceof Map<?, ?> filterTable))
 			throw new LuaException("Filter must be a table");
 
-    for (Object key : filterTable.keySet())
-      if (!(key instanceof String))
-        throw new LuaException("Filter keys must be strings");
+		for (Object key : filterTable.keySet())
+			if (!(key instanceof String))
+				throw new LuaException("Filter keys must be strings");
 
 		@SuppressWarnings("unchecked")
-    Map<String, Object> filter = (Map<String, Object>) filterTable;
+		Map<String, Object> filter = (Map<String, Object>) filterTable;
 
-    int itemsRequested = Integer.MAX_VALUE;
-    if (arguments.get(2) instanceof Number) {
-      itemsRequested = ((Number) arguments.get(2)).intValue();
-      if (itemsRequested < 1)
-        throw new LuaException("Count must be a positive number or nil for all");
-    }
-    int itemsSent = 0;
+		int itemsRequested = Integer.MAX_VALUE;
+		if (arguments.get(2) instanceof Number) {
+			itemsRequested = ((Number) arguments.get(2)).intValue();
+			if (itemsRequested < 1)
+				throw new LuaException("Count must be a positive number or nil for all");
+		}
+		int itemsSent = 0;
 
 		String address;
 		// Computercraft has forced my hand to make this dollar store filter algo
 		List<BigItemStack> validItems = new ArrayList<>();
 		for (BigItemStack entry : blockEntity.getAccurateSummary().getStacks()) {
-      int foundItems = ComputerUtil.bigItemStackToLuaTableFilter(entry, filter);
+			int foundItems = ComputerUtil.bigItemStackToLuaTableFilter(entry, filter);
 			if (foundItems > 0) {
 				int toTake = Math.min(foundItems, itemsRequested);
-        itemsRequested -= toTake;
-        itemsSent += toTake;
-        entry.count = toTake;
+				itemsRequested -= toTake;
+				itemsSent += toTake;
+				entry.count = toTake;
 				validItems.add(entry);
 			}
-      if (itemsRequested <= 0) break;
+			if (itemsRequested <= 0)
+				break;
 		}
 		if (arguments.get(1) instanceof String)
 			address = arguments.getString(1);
@@ -135,10 +135,10 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 		return ComputerUtil.list(blockEntity.getReceivedPaymentsHandler());
 	}
 
-    @LuaFunction(mainThread = true)
-    public Map<String, ?> getPaymentInventoryItemDetail(int slot) throws LuaException {
+	@LuaFunction(mainThread = true)
+	public Map<String, ?> getPaymentInventoryItemDetail(int slot) throws LuaException {
 		return ComputerUtil.getItemDetail(blockEntity.getReceivedPaymentsHandler(), slot);
-    }
+	}
 
 	@NotNull
 	@Override
