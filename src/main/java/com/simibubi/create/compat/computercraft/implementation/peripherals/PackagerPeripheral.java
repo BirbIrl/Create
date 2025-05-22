@@ -7,13 +7,11 @@ import java.util.Optional;
 
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.ItemStackHandler;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.simibubi.create.compat.computercraft.implementation.luaObjects.PackageLuaObject;
 import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
-import com.simibubi.create.content.logistics.box.PackageItem;
 import com.simibubi.create.content.logistics.BigItemStack;
 
 import dan200.computercraft.api.lua.LuaFunction;
@@ -110,55 +108,7 @@ public class PackagerPeripheral extends SyncedPeripheral<PackagerBlockEntity> {
     return new PackageLuaObject(blockEntity, box);
   }
 
-	@LuaFunction(mainThread = true)
-	public final boolean setPackageAddress(Optional<String> argument) {
-		if (!blockEntity.heldBox.isEmpty()) {
-			if (argument.isPresent()) {
-				PackageItem.addAddress(blockEntity.heldBox, argument.get());
-			} else {
-				PackageItem.addAddress(blockEntity.heldBox, "");
-			}
-			return true;
-		}
-		return false;
-	}
 
-	@LuaFunction(mainThread = true)
-	public final Map<Integer, Map<String, ?>> getPackageList() throws LuaException {
-		ItemStack box = blockEntity.heldBox;
-		if (box.isEmpty() && !PackageItem.isPackage(box))
-			return null;
-		ItemStackHandler results = PackageItem.getContents(box);
-		Map<Integer, Map<String, ?>> result = new HashMap<>();
-		for (int i = 0; i < results.getSlots(); i++) {
-			ItemStack stack = results.getStackInSlot(i);
-			if (!stack.isEmpty()) {
-				Map<String, Object> details = new HashMap<>(
-						VanillaDetailRegistries.ITEM_STACK.getBasicDetails(stack));
-				result.put(i + 1, details); // +1 because lua
-			}
-		}
-		return result;
-	}
-
-  @LuaFunction(mainThread = true)
-  public final Map<String, ?> getPackageItemDetail(int slot) throws LuaException {
-    ItemStack box = blockEntity.heldBox;
-    if (box.isEmpty() && !PackageItem.isPackage(box)) {
-      return null;
-    }
-
-    if (slot < 1 || slot > PackageItem.SLOTS) {
-      throw new LuaException("Slot out of range (between 1 and " + PackageItem.SLOTS + ")");
-    }
-
-    ItemStackHandler results = PackageItem.getContents(box);
-    ItemStack stack = results.getStackInSlot(slot - 1);
-    if (stack.isEmpty())
-      return null;
-
-    return new HashMap<>(VanillaDetailRegistries.ITEM_STACK.getDetails(stack));
-  }
 
 	@NotNull
 	@Override
