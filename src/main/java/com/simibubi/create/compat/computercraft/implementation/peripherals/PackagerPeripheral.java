@@ -1,7 +1,5 @@
 package com.simibubi.create.compat.computercraft.implementation.peripherals;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -12,11 +10,10 @@ import org.jetbrains.annotations.NotNull;
 
 import com.simibubi.create.compat.computercraft.implementation.luaObjects.PackageLuaObject;
 import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
-import com.simibubi.create.content.logistics.BigItemStack;
+import com.simibubi.create.compat.computercraft.implementation.ComputerUtil;
 
 import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.lua.LuaException;
-import dan200.computercraft.api.detail.VanillaDetailRegistries;
 
 public class PackagerPeripheral extends SyncedPeripheral<PackagerBlockEntity> {
 
@@ -51,37 +48,14 @@ public class PackagerPeripheral extends SyncedPeripheral<PackagerBlockEntity> {
 	}
 
 	@LuaFunction(mainThread = true)
-	public final Map<Integer, Map<String, ?>> list() {
-		Map<Integer, Map<String, ?>> result = new HashMap<>();
-		int i = 0;
-		for (BigItemStack entry : blockEntity.getAvailableItems().getStacks()) {
-			i++;
-			Map<String, Object> details = new HashMap<>(
-					VanillaDetailRegistries.ITEM_STACK.getBasicDetails(entry.stack));
-			details.put("count", entry.count);
-			result.put(i, details);
-		}
-		return result;
-	}
-
-  @LuaFunction(mainThread = true)
-  public final Map<String, ?> getItemDetail(int slot) throws LuaException {
-    List<BigItemStack> stacks = blockEntity.getAvailableItems().getStacks();
-    if (slot < 1) { // All positive can technically be valid
-      throw new LuaException("Slot out of range (1 or greater)");
+    public Map<Integer, Map<String, ?>> list() {
+		return ComputerUtil.list(blockEntity.targetInventory.getInventory());
     }
 
-    if (slot > stacks.size()) {
-      return null;
+    @LuaFunction(mainThread = true)
+    public Map<String, ?> getItemDetail(int slot) throws LuaException {
+		return ComputerUtil.getItemDetail(blockEntity.targetInventory.getInventory(), slot);
     }
-
-    BigItemStack entry = stacks.get(slot - 1);
-    Map<String, Object> details = new HashMap<>(
-        VanillaDetailRegistries.ITEM_STACK.getDetails(entry.stack));
-    details.put("count", entry.count);
-    return details;
-  }
-
 
 	@LuaFunction(mainThread = true)
 	public final String getAddress() {

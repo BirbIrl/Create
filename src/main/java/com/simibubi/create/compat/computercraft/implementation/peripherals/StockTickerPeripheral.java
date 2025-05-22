@@ -85,12 +85,12 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 			throw new LuaException("Filter must be a table");
 
     for (Object key : filterTable.keySet())
-      if (!(key instanceof String)) 
+      if (!(key instanceof String))
         throw new LuaException("Filter keys must be strings");
 
 		@SuppressWarnings("unchecked")
     Map<String, Object> filter = (Map<String, Object>) filterTable;
-    
+
     int itemsRequested = Integer.MAX_VALUE;
     if (arguments.get(2) instanceof Number) {
       itemsRequested = ((Number) arguments.get(2)).intValue();
@@ -98,7 +98,7 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
         throw new LuaException("Count must be a positive number or nil for all");
     }
     int itemsSent = 0;
-    
+
 		String address;
 		// Computercraft has forced my hand to make this dollar store filter algo
 		List<BigItemStack> validItems = new ArrayList<>();
@@ -134,6 +134,11 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 	public Map<Integer, Map<String, ?>> listPaymentInventory() {
 		return ComputerUtil.list(blockEntity.getReceivedPaymentsHandler());
 	}
+
+    @LuaFunction(mainThread = true)
+    public Map<String, ?> getPaymentInventoryItemDetail(int slot) throws LuaException {
+		return ComputerUtil.getItemDetail(blockEntity.getReceivedPaymentsHandler(), slot);
+    }
 
 	@NotNull
 	@Override

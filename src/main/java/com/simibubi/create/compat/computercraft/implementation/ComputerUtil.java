@@ -44,7 +44,7 @@ public class ComputerUtil {
     // Lua Objects can implement LuaComparable to provide a table representation for lazy filtering
     if (iVal instanceof LuaComparable iStack) {
       return deepEquals(fVal, iStack.getTableRepresentation());
-    } 
+    }
 
     // If both are numbers, compare them as doubles because lua numbers are always doubles
     if (fVal instanceof Number fn && iVal instanceof Number in)
@@ -61,16 +61,16 @@ public class ComputerUtil {
       if (op.equals("not")) {
         return !deepEquals(fValue, iVal);
       }
-      
+
       // Any / All operator
       if (op.equals("any") || op.equals("all")) {
         final String errorMsg = op + " operator requires a list of values";
-        
-        if (!(fValue instanceof Map<?,?> valueMap)) 
+
+        if (!(fValue instanceof Map<?,?> valueMap))
           throw new LuaException(errorMsg);
-        
+
         List<?> values = toOrderedList(valueMap);
-        if (values == null) 
+        if (values == null)
           throw new LuaException(errorMsg);
 
         boolean isAll = op.equals("all");
@@ -115,7 +115,7 @@ public class ComputerUtil {
           case "~=" -> in.doubleValue() != val.doubleValue();
           default   -> throw new LuaException("Unknown operator: " + op);
         };
-      
+
       // String matching
       if (iVal instanceof String inStr && fValue instanceof String fStr) {
         return switch (op) {
@@ -125,7 +125,7 @@ public class ComputerUtil {
         };
       }
 
-      throw new LuaException("Operator " + op + " not supported for type " + 
+      throw new LuaException("Operator " + op + " not supported for type " +
         (fValue == null ? "null" : fValue.getClass().getSimpleName()));
     }
 
@@ -135,11 +135,11 @@ public class ComputerUtil {
     // If one is not a collection, return false
     if (fColl == null || iColl == null)
       return false;
-    
+
     // Compare as list or map
     if (iColl.isList() && fColl.isList()) return matchList(fColl, iColl);
     if (iColl.isMap()  && fColl.isMap())  return matchMap (fColl, iColl);
-    return false;                                         
+    return false;
   }
 
   private static boolean matchList(Collection f, Collection i) throws LuaException {
@@ -147,7 +147,7 @@ public class ComputerUtil {
       case EXACT -> {
         if (f.list.size() != i.list.size()) return false;
         for (int k = 0; k < f.list.size(); k++)
-          if (!deepEquals(f.list.get(k), i.list.get(k))) 
+          if (!deepEquals(f.list.get(k), i.list.get(k)))
             return false;
         return true;
       }
@@ -161,7 +161,7 @@ public class ComputerUtil {
         }
         return true;
       }
-      case CONTAINED  -> 
+      case CONTAINED  ->
       {
         outer: for (Object iVal : i.list) {
           for (Iterator<?> it = f.list.iterator(); it.hasNext();) {
@@ -259,7 +259,7 @@ public class ComputerUtil {
       seen[k] = true;
     }
 
-    for (boolean ok : seen)  
+    for (boolean ok : seen)
       if (!ok) return false;
 
     return true;
@@ -275,7 +275,7 @@ public class ComputerUtil {
       out.set(((Number) e.getKey()).intValue() - 1, e.getValue());
     return out;
   }
-  
+
 	public static Map<Integer, Map<String, ?>> list(IItemHandler inventory) {
 		Map<Integer, Map<String, ?>> result = new HashMap<>();
 		var size = inventory.getSlots();
@@ -286,4 +286,13 @@ public class ComputerUtil {
 
 		return result;
 	}
+
+    public static Map<String, ?> getItemDetail(IItemHandler inventory, int slot) throws LuaException {
+
+		int maxSlots = inventory.getSlots();
+        if (slot < 1 || slot > maxSlots || Double.isNaN(slot))
+            throw new LuaException(String.format("Slot " + slot + " out of range,available slots between " + 1 + " and " + maxSlots));
+        var stack = inventory.getStackInSlot(slot - 1);
+        return stack.isEmpty() ? null : VanillaDetailRegistries.ITEM_STACK.getDetails(stack);
+    }
 }

@@ -1,18 +1,14 @@
 package com.simibubi.create.compat.computercraft.implementation.peripherals;
 
 import com.simibubi.create.content.logistics.packagePort.postbox.PostboxBlockEntity;
+import com.simibubi.create.compat.computercraft.implementation.ComputerUtil;
 
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.lua.LuaFunction;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import net.minecraft.world.item.ItemStack;
-import dan200.computercraft.api.detail.VanillaDetailRegistries;
 
 public class PostboxPeripheral extends SyncedPeripheral<PostboxBlockEntity> {
 
@@ -33,28 +29,15 @@ public class PostboxPeripheral extends SyncedPeripheral<PostboxBlockEntity> {
 	}
 
 	@LuaFunction(mainThread = true)
-	public final Map<Integer, Map<String, ?>> list() {
-		Map<Integer, Map<String, ?>> result = new HashMap<>();
-		for (int i = 0; i < blockEntity.inventory.getSlots(); i++) {
-			Map<String, Object> details = new HashMap<>(
-          VanillaDetailRegistries.ITEM_STACK.getBasicDetails(blockEntity.inventory.getStackInSlot(i)));
-			result.put(i + 1, details);
-		}
-		return result;
-	}
+    public Map<Integer, Map<String, ?>> list() {
+		return ComputerUtil.list(blockEntity.inventory);
+    }
 
-	@LuaFunction(mainThread = true)
-	public final Map<String, ?> getItemDetail(int slot) throws LuaException {
-		if (slot < 1 || slot > blockEntity.inventory.getSlots()) {
-			throw new LuaException("Slot out of range (must be between 1 and " + blockEntity.inventory.getSlots() + ")");
-		}
+    @LuaFunction(mainThread = true)
+    public Map<String, ?> getItemDetail(int slot) throws LuaException {
+		return ComputerUtil.getItemDetail(blockEntity.inventory, slot);
+    }
 
-		ItemStack itemStack = blockEntity.inventory.getStackInSlot(slot - 1);
-		if (itemStack.isEmpty()) {
-			return null;
-		}
-		return VanillaDetailRegistries.ITEM_STACK.getDetails(itemStack);
-	}
 
 	@NotNull
 	@Override
