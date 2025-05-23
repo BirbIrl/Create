@@ -20,7 +20,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.ItemStackHandler;
 
 public class PackageOrderLuaObject implements LuaComparable {
-  
+
   private PackageLuaObject parent;
   private PackageOrderWithCrafts context;
 
@@ -28,7 +28,7 @@ public class PackageOrderLuaObject implements LuaComparable {
     this.parent = packageLuaObject;
     this.context = PackageItem.getOrderContext(parent.box);
   }
-  
+
   @LuaFunction(mainThread = true)
   public final int getOrderID() throws LuaException {
 		parent.checkValid();
@@ -59,15 +59,17 @@ public class PackageOrderLuaObject implements LuaComparable {
     return PackageItem.isFinalLink(parent.box);
   }
 
+  // the list  and getItemDetail functions here are hard coded because it's for BigItemStacks. Every other implementation should use ComputerUtils functions.
+
   @LuaFunction(mainThread = true)
   public final CreateLuaTable list() throws LuaException {
     parent.checkValid();
     if (context == null) {
       return null;
     }
-    
+
     CreateLuaTable stacks = new CreateLuaTable();
-    
+
     int i = 0;
     for (BigItemStack bis : context.stacks()) {
       i++;
@@ -86,7 +88,7 @@ public class PackageOrderLuaObject implements LuaComparable {
     if (context == null) {
       return null;
     }
-    
+
     if (slot < 1) { // All positive can technically be valid
       throw new LuaException("Slot out of range (1 or greater)");
     }
@@ -112,7 +114,7 @@ public class PackageOrderLuaObject implements LuaComparable {
     }
 
     CreateLuaTable crafts = new CreateLuaTable();
-    
+
     int i = 0;
     for (CraftingEntry entry : context.orderedCrafts()) {
       CreateLuaTable craft = new CreateLuaTable();
@@ -133,7 +135,7 @@ public class PackageOrderLuaObject implements LuaComparable {
 
     return crafts;
   }
-  
+
   public final List<LuaBigItemStack> getLuaItemStacks() {
     List<LuaBigItemStack> result = new ArrayList<>();
 

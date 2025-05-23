@@ -4,14 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 
-import com.simibubi.create.compat.computercraft.implementation.luaObjects.PackageOrderLuaObject;
 import com.simibubi.create.content.logistics.box.PackageItem;
 import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
-import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts;
-import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts.CraftingEntry;
+import com.simibubi.create.compat.computercraft.implementation.ComputerUtil;
 
 import dan200.computercraft.api.detail.VanillaDetailRegistries;
 import dan200.computercraft.api.lua.LuaException;
@@ -56,40 +53,19 @@ public class PackageLuaObject implements LuaComparable {
     checkEditable();
     PackageItem.addAddress(box, argument);
 	}
-  
+
 	@LuaFunction(mainThread = true)
-	public final Map<Integer, Map<String, ?>> list() throws LuaException {
-		checkValid();
-
-		ItemStackHandler results = PackageItem.getContents(box);
-		Map<Integer, Map<String, ?>> result = new HashMap<>();
-		for (int i = 0; i < results.getSlots(); i++) {
-			ItemStack stack = results.getStackInSlot(i);
-			if (!stack.isEmpty()) {
-				Map<String, Object> details = new HashMap<>(
-          VanillaDetailRegistries.ITEM_STACK.getBasicDetails(stack));
-				result.put(i + 1, details); // +1 because lua
-			}
-		}
-		return result;
-	}
-
-  @LuaFunction(mainThread = true)
-  public final Map<String, ?> getItemDetail(int slot) throws LuaException {
-    checkValid();
-
-    if (slot < 1 || slot > PackageItem.SLOTS) {
-      throw new LuaException("Slot out of range (between 1 and " + PackageItem.SLOTS + ")");
+    public Map<Integer, Map<String, ?>> list() {
+		return ComputerUtil.list(PackageItem.getContents(box));
     }
 
-    ItemStackHandler results = PackageItem.getContents(box);
-    ItemStack stack = results.getStackInSlot(slot - 1);
-    if (stack.isEmpty())
-      return null;
-
-    return new HashMap<>(VanillaDetailRegistries.ITEM_STACK.getDetails(stack));
+  @LuaFunction(mainThread = true)
+	public Map<String, ?> getItemDetail(int slot) throws LuaException {
+    checkValid();
+		return ComputerUtil.getItemDetail(PackageItem.getContents(box), slot);
   }
-  
+
+
   public boolean hasOrderData() {
     return PackageItem.hasFragmentData(box);
   }
@@ -103,7 +79,7 @@ public class PackageLuaObject implements LuaComparable {
 
     return new PackageOrderLuaObject(this);
   }
-  
+
   public final List<LuaItemStack> getLuaItemStacks() {
 		ItemStackHandler results = PackageItem.getContents(box);
 		List<LuaItemStack> result = new ArrayList<>();
@@ -114,7 +90,7 @@ public class PackageLuaObject implements LuaComparable {
         result.add(new LuaItemStack(stack));
       }
     }
-    
+
     return result;
 	}
 
