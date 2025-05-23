@@ -34,7 +34,7 @@ public class RepackagerPeripheral extends SyncedPeripheral<RepackagerBlockEntity
 		// explicitly calls setAddress again on the BE.
 		blockEntity.hasCustomComputerAddress = false;
 	}
-  
+
 	@LuaFunction(mainThread = true)
 	public final boolean makePackage() {
 		if (!blockEntity.heldBox.isEmpty())
@@ -47,6 +47,7 @@ public class RepackagerPeripheral extends SyncedPeripheral<RepackagerBlockEntity
 
 	@LuaFunction(mainThread = true)
 	public final String getAddress() {
+		blockEntity.updateSignAddress();
 		return blockEntity.signBasedAddress;
 	}
 
@@ -62,14 +63,14 @@ public class RepackagerPeripheral extends SyncedPeripheral<RepackagerBlockEntity
 		}
 	}
 
-  @LuaFunction(mainThread = true)
-  public final PackageLuaObject getPackage() {
-    ItemStack box = blockEntity.heldBox;
-    if (box.isEmpty())
-      return null;
+	@LuaFunction(mainThread = true)
+	public final PackageLuaObject getPackage() {
+		ItemStack box = blockEntity.heldBox;
+		if (box.isEmpty())
+			return null;
 
-    return new PackageLuaObject(blockEntity, box);
-  }
+		return new PackageLuaObject(blockEntity, box);
+	}
 
 	@NotNull
 	@Override
