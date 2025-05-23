@@ -30,6 +30,9 @@ local.properties
 .settings/
 .loadpath
 
+# Wacky systems like nixos use this for custom java paths
+.factorypath
+
 # External tool builders
 .externalToolBuilders/
 
