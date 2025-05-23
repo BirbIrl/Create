@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.ArrayList;
 
 import dan200.computercraft.api.lua.LuaFunction;
-import net.minecraft.world.item.ItemStack;
 import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.detail.VanillaDetailRegistries;
@@ -23,11 +22,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEntity> {
 
-	// private final ScrollValueBehaviour targetSpeed;
-
 	public StockTickerPeripheral(StockTickerBlockEntity blockEntity) {
 		super(blockEntity);
-		// this.targetSpeed = targetSpeed;
 	}
 
 	@LuaFunction(mainThread = true)
@@ -37,7 +33,7 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 		for (BigItemStack entry : blockEntity.getAccurateSummary().getStacks()) {
 			i++;
 			Map<String, Object> details = new HashMap<>(
-					VanillaDetailRegistries.ITEM_STACK.getBasicDetails(entry.stack));
+				VanillaDetailRegistries.ITEM_STACK.getBasicDetails(entry.stack));
 			details.put("count", entry.count);
 			result.put(i, details);
 		}
@@ -51,7 +47,7 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 		for (BigItemStack entry : blockEntity.getAccurateSummary().getStacks()) {
 			i++;
 			Map<String, Object> details = new HashMap<>(
-					VanillaDetailRegistries.ITEM_STACK.getDetails(entry.stack));
+				VanillaDetailRegistries.ITEM_STACK.getDetails(entry.stack));
 			details.put("count", entry.count);
 			result.put(i, details);
 		}
@@ -59,7 +55,7 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 	}
 
 	/*
-	 * for every item in the netowrk, this will compare that item to the CC args
+	 * for every item in the network, this will compare that item to the CC args
 	 * filter, a table that looks something like this:
 	 * {
 	 * name = "minecraft:jungle_log",
@@ -121,12 +117,6 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 		PackageOrder order = new PackageOrder(validItems);
 		blockEntity.broadcastPackageRequest(RequestType.RESTOCK, order, null, address);
 
-		/*
-		 * CatnipServices.NETWORK
-		 * .sendToServer(new PackageOrderRequestPacket(blockEntity.getBlockPos(), new
-		 * PackageOrder(itemsToOrder),
-		 * address, false, new PackageOrder(stacks);
-		 */
 		return itemsSent;
 	}
 
@@ -150,4 +140,5 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 	public @Nullable Object getTarget() {
 		return blockEntity.getReceivedPaymentsHandler();
 	}
+
 }

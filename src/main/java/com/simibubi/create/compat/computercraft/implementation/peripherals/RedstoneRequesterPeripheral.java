@@ -17,7 +17,6 @@ import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts.
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.ArrayList;
 
 import dan200.computercraft.api.detail.VanillaDetailRegistries;
@@ -27,11 +26,8 @@ import dan200.computercraft.api.lua.LuaException;
 
 public class RedstoneRequesterPeripheral extends SyncedPeripheral<RedstoneRequesterBlockEntity> {
 
-	// private final ScrollValueBehaviour targetSpeed;
-
 	public RedstoneRequesterPeripheral(RedstoneRequesterBlockEntity blockEntity) {
 		super(blockEntity);
-		// this.targetSpeed = targetSpeed;
 	}
 
 	@LuaFunction(mainThread = true)
@@ -55,8 +51,8 @@ public class RedstoneRequesterPeripheral extends SyncedPeripheral<RedstoneReques
 
 		PackageOrder order = new PackageOrder(orderStacks);
 		CraftingEntry orderContext = new CraftingEntry(new PackageOrder(orderStacks.stream()
-				.map(stack -> new BigItemStack(stack.stack.copyWithCount(1)))
-				.toList()), count);
+			.map(stack -> new BigItemStack(stack.stack.copyWithCount(1)))
+			.toList()), count);
 
 		this.blockEntity.encodedRequest = new PackageOrderWithCrafts(order, List.of(orderContext));
 		this.blockEntity.notifyUpdate();
@@ -64,7 +60,7 @@ public class RedstoneRequesterPeripheral extends SyncedPeripheral<RedstoneReques
 
 	@LuaFunction(mainThread = true)
 	public final void setAddress(String address) throws LuaException {
-    blockEntity.encodedTargetAdress = address;
+		blockEntity.encodedTargetAdress = address;
 		this.blockEntity.notifyUpdate();
 	}
 
@@ -78,11 +74,10 @@ public class RedstoneRequesterPeripheral extends SyncedPeripheral<RedstoneReques
 		List<BigItemStack> stacks = blockEntity.encodedRequest.stacks();
 		Map<Integer, Map<String, ?>> result = new HashMap<>();
 		// Loop through the packageOrder get each bigItem stack
-		//
 		for (int i = 0; i < stacks.size(); i++) {
 			ItemStack stack = stacks.get(i).stack;
 			Map<String, Object> details = new HashMap<>(
-					VanillaDetailRegistries.ITEM_STACK.getDetails(stack));
+				VanillaDetailRegistries.ITEM_STACK.getDetails(stack));
 			if (!details.get("name").equals("minecraft:air")) {
 				details.put("count", stacks.get(i).count);
 				result.put(i + 1, details); // +1 because lua

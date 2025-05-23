@@ -3,7 +3,6 @@ package com.simibubi.create.compat.computercraft.implementation.peripherals;
 import java.util.Optional;
 
 import com.simibubi.create.content.logistics.packager.repackager.RepackagerBlockEntity;
-import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts;
 import com.simibubi.create.compat.computercraft.implementation.luaObjects.PackageLuaObject;
 
 import dan200.computercraft.api.peripheral.IComputerAccess;
@@ -40,9 +39,7 @@ public class RepackagerPeripheral extends SyncedPeripheral<RepackagerBlockEntity
 		if (!blockEntity.heldBox.isEmpty())
 			return false;
 		blockEntity.activate();
-		if (blockEntity.heldBox.isEmpty())
-			return false;
-		return true;
+		return !blockEntity.heldBox.isEmpty();
 	}
 
 	@LuaFunction(mainThread = true)

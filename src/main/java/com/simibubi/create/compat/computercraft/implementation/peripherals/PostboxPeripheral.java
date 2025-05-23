@@ -18,9 +18,9 @@ public class PostboxPeripheral extends SyncedPeripheral<PostboxBlockEntity> {
 
 	@LuaFunction(mainThread = true)
 	public final void setAddress(String address) throws LuaException {
-    blockEntity.addressFilter = address;
-    blockEntity.filterChanged();
-    blockEntity.notifyUpdate();
+		blockEntity.addressFilter = address;
+		blockEntity.filterChanged();
+		blockEntity.notifyUpdate();
 	}
 
 	@LuaFunction(mainThread = true)
@@ -29,15 +29,14 @@ public class PostboxPeripheral extends SyncedPeripheral<PostboxBlockEntity> {
 	}
 
 	@LuaFunction(mainThread = true)
-    public Map<Integer, Map<String, ?>> list() {
+	public Map<Integer, Map<String, ?>> list() {
 		return ComputerUtil.list(blockEntity.inventory);
-    }
+	}
 
-    @LuaFunction(mainThread = true)
-    public Map<String, ?> getItemDetail(int slot) throws LuaException {
+	@LuaFunction(mainThread = true)
+	public Map<String, ?> getItemDetail(int slot) throws LuaException {
 		return ComputerUtil.getItemDetail(blockEntity.inventory, slot);
-    }
-
+	}
 
 	@NotNull
 	@Override

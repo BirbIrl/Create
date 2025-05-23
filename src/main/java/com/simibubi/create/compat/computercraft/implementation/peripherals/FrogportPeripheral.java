@@ -8,9 +8,7 @@ import dan200.computercraft.api.lua.LuaFunction;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
 import java.util.Map;
-import dan200.computercraft.api.detail.VanillaDetailRegistries;
 
 public class FrogportPeripheral extends SyncedPeripheral<FrogportBlockEntity> {
 
@@ -32,14 +30,14 @@ public class FrogportPeripheral extends SyncedPeripheral<FrogportBlockEntity> {
 
 
 	@LuaFunction(mainThread = true)
-    public Map<Integer, Map<String, ?>> list() {
+	public Map<Integer, Map<String, ?>> list() {
 		return ComputerUtil.list(blockEntity.inventory);
-    }
+	}
 
-    @LuaFunction(mainThread = true)
-    public Map<String, ?> getItemDetail(int slot) throws LuaException {
+	@LuaFunction(mainThread = true)
+	public Map<String, ?> getItemDetail(int slot) throws LuaException {
 		return ComputerUtil.getItemDetail(blockEntity.inventory, slot);
-    }
+	}
 
 	@NotNull
 	@Override

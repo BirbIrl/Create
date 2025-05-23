@@ -48,14 +48,14 @@ public class PackagerPeripheral extends SyncedPeripheral<PackagerBlockEntity> {
 	}
 
 	@LuaFunction(mainThread = true)
-    public Map<Integer, Map<String, ?>> list() {
+	public Map<Integer, Map<String, ?>> list() {
 		return ComputerUtil.list(blockEntity.targetInventory.getInventory());
-    }
+	}
 
-    @LuaFunction(mainThread = true)
-    public Map<String, ?> getItemDetail(int slot) throws LuaException {
+	@LuaFunction(mainThread = true)
+	public Map<String, ?> getItemDetail(int slot) throws LuaException {
 		return ComputerUtil.getItemDetail(blockEntity.targetInventory.getInventory(), slot);
-    }
+	}
 
 	@LuaFunction(mainThread = true)
 	public final String getAddress() {
@@ -75,15 +75,13 @@ public class PackagerPeripheral extends SyncedPeripheral<PackagerBlockEntity> {
 		}
 	}
 
-  @LuaFunction(mainThread = true)
-  public final PackageLuaObject getPackage() {
-    ItemStack box = blockEntity.heldBox;
-    if (box.isEmpty())
-      return null;
-    return new PackageLuaObject(blockEntity, box);
-  }
-
-
+	@LuaFunction(mainThread = true)
+	public final PackageLuaObject getPackage() {
+		ItemStack box = blockEntity.heldBox;
+		if (box.isEmpty())
+			return null;
+		return new PackageLuaObject(blockEntity, box);
+	}
 
 	@NotNull
 	@Override
