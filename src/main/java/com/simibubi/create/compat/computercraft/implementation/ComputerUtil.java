@@ -51,7 +51,7 @@ public class ComputerUtil {
       return Double.compare(fn.doubleValue(), in.doubleValue()) == 0;
 
     // Other comparisons for Not, Type, Numbers, and Strings
-    // Example: count = { "_op": ">=", "value": 10 }
+    // Example: count = { _op =  ">=", value = 10 }
     if (fVal instanceof Map<?, ?> fMap && fMap.get("_op") instanceof String op &&
         fMap.get("value") != null) {
       // Value to use operator on
