@@ -8,6 +8,7 @@ import com.simibubi.create.compat.computercraft.implementation.ComputerUtil;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBehaviour.RequestType;
 import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
 
+import java.util.Optional;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -27,27 +28,15 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 	}
 
 	@LuaFunction(mainThread = true)
-	public final Map<Integer, Map<String, ?>> list() {
+	public final Map<Integer, Map<String, ?>> list(Optional<Boolean> argument) {
 		Map<Integer, Map<String, ?>> result = new HashMap<>();
 		int i = 0;
 		for (BigItemStack entry : blockEntity.getAccurateSummary().getStacks()) {
 			i++;
 			Map<String, Object> details = new HashMap<>(
-				VanillaDetailRegistries.ITEM_STACK.getBasicDetails(entry.stack));
-			details.put("count", entry.count);
-			result.put(i, details);
-		}
-		return result;
-	}
-
-	@LuaFunction(mainThread = true)
-	public final Map<Integer, Map<String, ?>> listDetailed() {
-		Map<Integer, Map<String, ?>> result = new HashMap<>();
-		int i = 0;
-		for (BigItemStack entry : blockEntity.getAccurateSummary().getStacks()) {
-			i++;
-			Map<String, Object> details = new HashMap<>(
-				VanillaDetailRegistries.ITEM_STACK.getDetails(entry.stack));
+					argument.isPresent() && argument.get()
+							? VanillaDetailRegistries.ITEM_STACK.getDetails(entry.stack)
+							: VanillaDetailRegistries.ITEM_STACK.getBasicDetails(entry.stack));
 			details.put("count", entry.count);
 			result.put(i, details);
 		}
