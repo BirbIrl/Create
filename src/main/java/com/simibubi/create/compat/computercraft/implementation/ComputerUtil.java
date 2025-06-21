@@ -299,7 +299,6 @@ public class ComputerUtil {
 
     public static Map<String, ?> getItemDetail(InventorySummary inventorySummary, int slot) throws LuaException {
 		List<BigItemStack> stacks = inventorySummary.getStacks();
-		Map<Integer, Map<String, ?>> result = new HashMap<>();
 		int maxSlots = stacks.size();
         if (slot < 1 || slot > maxSlots || Double.isNaN(slot))
             throw new LuaException(String.format("Slot " + slot + " out of range,available slots between " + 1 + " and " + maxSlots));

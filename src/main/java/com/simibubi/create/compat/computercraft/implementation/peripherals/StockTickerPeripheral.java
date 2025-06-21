@@ -98,8 +98,6 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 					break;
 			}
 
-			PackageOrder order = new PackageOrder(validItems);
-
 			orders.add(new PackageOrder(validItems));
 		}
 
