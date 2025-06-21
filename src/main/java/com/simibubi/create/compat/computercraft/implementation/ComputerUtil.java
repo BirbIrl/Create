@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import com.simibubi.create.compat.computercraft.implementation.luaObjects.LuaComparable;
 import com.simibubi.create.content.logistics.BigItemStack;
+import com.simibubi.create.content.logistics.packager.InventorySummary;
 
 import dan200.computercraft.api.detail.VanillaDetailRegistries;
 import dan200.computercraft.api.lua.LuaException;
@@ -294,5 +295,19 @@ public class ComputerUtil {
             throw new LuaException(String.format("Slot " + slot + " out of range,available slots between " + 1 + " and " + maxSlots));
         var stack = inventory.getStackInSlot(slot - 1);
         return stack.isEmpty() ? null : VanillaDetailRegistries.ITEM_STACK.getDetails(stack);
+    }
+
+    public static Map<String, ?> getItemDetail(InventorySummary inventorySummary, int slot) throws LuaException {
+		List<BigItemStack> stacks = inventorySummary.getStacks();
+		Map<Integer, Map<String, ?>> result = new HashMap<>();
+		int maxSlots = stacks.size();
+        if (slot < 1 || slot > maxSlots || Double.isNaN(slot))
+            throw new LuaException(String.format("Slot " + slot + " out of range,available slots between " + 1 + " and " + maxSlots));
+		BigItemStack entry = stacks.get(slot-1);
+		Map<String, Object> details = new HashMap<>(VanillaDetailRegistries.ITEM_STACK.getDetails(entry.stack));
+		details.put("count", entry.count);
+
+        return
+		entry.stack.isEmpty() ? null : details;
     }
 }
