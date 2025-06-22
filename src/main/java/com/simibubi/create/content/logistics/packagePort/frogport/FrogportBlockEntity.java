@@ -62,7 +62,7 @@ public class FrogportBlockEntity extends PackagePortBlockEntity implements IHave
 
 	private boolean failedLastExport;
 	private FrogportSounds sounds;
-
+	
 	private ItemStack deferAnimationStart;
 	private boolean deferAnimationInward;
 
@@ -141,7 +141,7 @@ public class FrogportBlockEntity extends PackagePortBlockEntity implements IHave
 	@Override
 	public void tick() {
 		super.tick();
-
+		
 		if (deferAnimationStart != null) {
 			startAnimation(deferAnimationStart, deferAnimationInward);
 			deferAnimationStart = null;
@@ -374,7 +374,7 @@ public class FrogportBlockEntity extends PackagePortBlockEntity implements IHave
 		if (level.isClientSide())
 			sounds.open(level, worldPosition);
 	}
-
+	
 	@Override
 	public InteractionResult use(Player player) {
 		if (player == null)
@@ -389,7 +389,7 @@ public class FrogportBlockEntity extends PackagePortBlockEntity implements IHave
 			}
 			return InteractionResult.SUCCESS;
 		}
-
+		
 		return super.use(player);
 	}
 
