@@ -142,11 +142,11 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 			if (!level.isClientSide() && !queuedExitingPackages.isEmpty() && heldBox.isEmpty()) {
 				BigItemStack entry = queuedExitingPackages.get(0);
 				heldBox = entry.stack.copy();
-
+				
 				entry.count--;
 				if (entry.count <= 0)
 					queuedExitingPackages.remove(0);
-
+				
 				animationInward = false;
 				animationTicks = CYCLE;
 				notifyUpdate();
