@@ -28,7 +28,7 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 	}
 
 	@LuaFunction(mainThread = true)
-	public final Map<Integer, Map<String, ?>> listStock(Optional<Boolean> detailed) {
+	public final Map<Integer, Map<String, ?>> stock(Optional<Boolean> detailed) {
 		Map<Integer, Map<String, ?>> result = new HashMap<>();
 		int i = 0;
 		for (BigItemStack entry : blockEntity.getAccurateSummary().getStacks()) {
@@ -44,7 +44,7 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 	}
 
 	@LuaFunction(mainThread = true)
-	public final Map<String, ?> getItemDetail(int slot) throws LuaException {
+	public final Map<String, ?> getStockItemDetail(int slot) throws LuaException {
 		return ComputerUtil.getItemDetail(blockEntity.getAccurateSummary(), slot);
 	}
 
@@ -108,12 +108,12 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 	}
 
 	@LuaFunction(mainThread = true)
-	public Map<Integer, Map<String, ?>> paymentInventoryList() {
+	public Map<Integer, Map<String, ?>> list() {
 		return ComputerUtil.list(blockEntity.getReceivedPaymentsHandler());
 	}
 
 	@LuaFunction(mainThread = true)
-	public Map<String, ?> paymentInventoryGetItemDetail(int slot) throws LuaException {
+	public Map<String, ?> getItemDetail(int slot) throws LuaException {
 		return ComputerUtil.getItemDetail(blockEntity.getReceivedPaymentsHandler(), slot);
 	}
 
