@@ -2,6 +2,8 @@ package com.simibubi.create.compat.computercraft.implementation.peripherals;
 
 import com.simibubi.create.content.logistics.packagePort.postbox.PostboxBlockEntity;
 import com.simibubi.create.compat.computercraft.implementation.ComputerUtil;
+import com.simibubi.create.AllPackets;
+import com.simibubi.create.content.logistics.packagePort.PackagePortConfigurationPacket;
 
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.lua.LuaFunction;
@@ -36,6 +38,34 @@ public class PostboxPeripheral extends SyncedPeripheral<PostboxBlockEntity> {
 	@LuaFunction(mainThread = true)
 	public Map<String, ?> getItemDetail(int slot) throws LuaException {
 		return ComputerUtil.getItemDetail(blockEntity.inventory, slot);
+	}
+
+	@LuaFunction(mainThread = true)
+	public final String getConfiguration() throws LuaException {
+		if (blockEntity.target == null)
+			return null;
+		if (blockEntity.acceptsPackages)
+			return "send_recieve";
+		else
+			return "send";
+	}
+
+	@LuaFunction(mainThread = true)
+	public final boolean setConfiguration(String config) throws LuaException {
+		if (blockEntity.target == null)
+			return false;
+		if (config.equals("send_recieve")) {
+			AllPackets.getChannel().sendToServer(
+					new PackagePortConfigurationPacket(blockEntity.getBlockPos(), blockEntity.addressFilter, true));
+			return true;
+		}
+		if (config.equals("send")) {
+			AllPackets.getChannel().sendToServer(
+					new PackagePortConfigurationPacket(blockEntity.getBlockPos(), blockEntity.addressFilter, false));
+			return true;
+		}
+		throw new LuaException("Unknown configuration: \"" + config
+				+ "\" Possible configurations are: \"send_recieve\" and \"send\".");
 	}
 
 	@NotNull
