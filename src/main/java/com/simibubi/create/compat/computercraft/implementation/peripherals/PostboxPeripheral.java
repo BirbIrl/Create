@@ -56,11 +56,13 @@ public class PostboxPeripheral extends SyncedPeripheral<PostboxBlockEntity> {
 			return false;
 		if (config.equals("send_recieve")) {
 			blockEntity.acceptsPackages = true;
+			blockEntity.filterChanged();
 			blockEntity.notifyUpdate();
 			return true;
 		}
 		if (config.equals("send")) {
 			blockEntity.acceptsPackages = false;
+			blockEntity.filterChanged();
 			blockEntity.notifyUpdate();
 			return true;
 		}
