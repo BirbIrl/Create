@@ -55,13 +55,13 @@ public class PostboxPeripheral extends SyncedPeripheral<PostboxBlockEntity> {
 		if (blockEntity.target == null)
 			return false;
 		if (config.equals("send_recieve")) {
-			AllPackets.getChannel().sendToServer(
-					new PackagePortConfigurationPacket(blockEntity.getBlockPos(), blockEntity.addressFilter, true));
+			blockEntity.acceptsPackages = true;
+			blockEntity.notifyUpdate();
 			return true;
 		}
 		if (config.equals("send")) {
-			AllPackets.getChannel().sendToServer(
-					new PackagePortConfigurationPacket(blockEntity.getBlockPos(), blockEntity.addressFilter, false));
+			blockEntity.acceptsPackages = false;
+			blockEntity.notifyUpdate();
 			return true;
 		}
 		throw new LuaException("Unknown configuration: \"" + config
