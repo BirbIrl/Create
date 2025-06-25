@@ -33,7 +33,7 @@ public class ComputerUtil {
       }
     }
 
-    if (!deepEquals(filter, details))
+	if (!deepEquals(new HashMap<>(filter), details))
       return 0;
     return entry.count;
   }
