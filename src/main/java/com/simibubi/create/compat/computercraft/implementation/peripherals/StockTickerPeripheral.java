@@ -49,13 +49,7 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 	}
 
 	@LuaFunction(mainThread = true)
-	public final int requestFiltered(Optional<String> address, IArguments filters) throws LuaException {
-
-		String targetAddress;
-		if (address.isPresent())
-			targetAddress = address.get();
-		else
-			targetAddress = "";
+	public final int requestFiltered(String address, IArguments filters) throws LuaException {
 
 		List<PackageOrder> orders = new ArrayList<>();
 
@@ -102,7 +96,7 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 		}
 
 		for (var order : orders)
-			blockEntity.broadcastPackageRequest(RequestType.RESTOCK, order, null, targetAddress);
+			blockEntity.broadcastPackageRequest(RequestType.RESTOCK, order, null, address);
 
 		return totalItemsSent;
 	}
