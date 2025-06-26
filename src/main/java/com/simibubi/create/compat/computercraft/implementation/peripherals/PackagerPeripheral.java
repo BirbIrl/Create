@@ -41,7 +41,7 @@ public class PackagerPeripheral extends SyncedPeripheral<PackagerBlockEntity> {
 	public final boolean makePackage() {
 		if (!blockEntity.heldBox.isEmpty())
 			return false;
-		blockEntity.activate(); // activate() doesn't return a value so i'm walking around it
+		blockEntity.activate();
 		if (blockEntity.heldBox.isEmpty())
 			return false;
 		return true;

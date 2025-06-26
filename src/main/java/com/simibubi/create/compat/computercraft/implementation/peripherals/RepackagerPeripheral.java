@@ -1,9 +1,11 @@
 package com.simibubi.create.compat.computercraft.implementation.peripherals;
 
 import java.util.Optional;
+import java.util.Map;
 
 import com.simibubi.create.content.logistics.packager.repackager.RepackagerBlockEntity;
 import com.simibubi.create.compat.computercraft.implementation.luaObjects.PackageLuaObject;
+import com.simibubi.create.compat.computercraft.implementation.ComputerUtil;
 
 import dan200.computercraft.api.peripheral.IComputerAccess;
 
@@ -11,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import net.minecraft.world.item.ItemStack;
 import dan200.computercraft.api.lua.LuaFunction;
+import dan200.computercraft.api.lua.LuaException;
 
 public class RepackagerPeripheral extends SyncedPeripheral<RepackagerBlockEntity> {
 
@@ -39,7 +42,19 @@ public class RepackagerPeripheral extends SyncedPeripheral<RepackagerBlockEntity
 		if (!blockEntity.heldBox.isEmpty())
 			return false;
 		blockEntity.activate();
-		return !blockEntity.heldBox.isEmpty();
+		if (blockEntity.heldBox.isEmpty())
+			return false;
+		return true;
+	}
+
+	@LuaFunction(mainThread = true)
+	public Map<Integer, Map<String, ?>> list() {
+		return ComputerUtil.list(blockEntity.targetInventory.getInventory());
+	}
+
+	@LuaFunction(mainThread = true)
+	public Map<String, ?> getItemDetail(int slot) throws LuaException {
+		return ComputerUtil.getItemDetail(blockEntity.targetInventory.getInventory(), slot);
 	}
 
 	@LuaFunction(mainThread = true)
