@@ -84,16 +84,16 @@ public class RedstoneRequesterPeripheral extends SyncedPeripheral<RedstoneReques
 	}
 
 	@LuaFunction(mainThread = true)
-	public final boolean setConfiguration(String config) throws LuaException {
+	public void setConfiguration(String config) throws LuaException {
 		if (config.equals("allow_partial")) {
 			blockEntity.allowPartialRequests = true;
 			blockEntity.notifyUpdate();
-			return true;
+			return;
 		}
 		if (config.equals("strict")) {
 			blockEntity.allowPartialRequests = false;
 			blockEntity.notifyUpdate();
-			return true;
+			return;
 		}
 		throw new LuaException("Unknown configuration: \"" + config
 				+ "\" Possible configurations are: \"allow_partial\" and \"strict\".");
