@@ -37,7 +37,7 @@ public class PackageLuaObject implements LuaComparable {
 	@LuaFunction(mainThread = true)
 	public final String getAddress() throws LuaException {
 		if (isEditable())
-			return PackageItem.getAddress(box);
+			this.address = PackageItem.getAddress(box);
 		return this.address;
 	}
 
