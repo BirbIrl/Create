@@ -31,31 +31,26 @@ public class PackageOrderLuaObject implements LuaComparable {
 
   @LuaFunction(mainThread = true)
   public final int getOrderID() throws LuaException {
-		parent.checkValid();
     return PackageItem.getOrderId(parent.box);
   }
 
   @LuaFunction(mainThread = true)
   public final int getIndex() throws LuaException {
-    parent.checkValid();
     return PackageItem.getIndex(parent.box) + 1;
   }
 
   @LuaFunction(mainThread = true)
   public final boolean isFinal() throws LuaException {
-    parent.checkValid();
     return PackageItem.isFinal(parent.box);
   }
 
   @LuaFunction(mainThread = true)
   public final int getLinkIndex() throws LuaException {
-    parent.checkValid();
     return PackageItem.getLinkIndex(parent.box) + 1;
   }
 
   @LuaFunction(mainThread = true)
   public final boolean isFinalLink() throws LuaException {
-    parent.checkValid();
     return PackageItem.isFinalLink(parent.box);
   }
 
@@ -63,7 +58,6 @@ public class PackageOrderLuaObject implements LuaComparable {
 
   @LuaFunction(mainThread = true)
   public final CreateLuaTable list() throws LuaException {
-    parent.checkValid();
     if (context == null) {
       return null;
     }
@@ -84,7 +78,6 @@ public class PackageOrderLuaObject implements LuaComparable {
 
   @LuaFunction(mainThread = true)
   public final CreateLuaTable getItemDetail(int slot) throws LuaException {
-    parent.checkValid();
     if (context == null) {
       return null;
     }
@@ -108,7 +101,6 @@ public class PackageOrderLuaObject implements LuaComparable {
 
   @LuaFunction(mainThread = true)
   public final CreateLuaTable getCrafts() throws LuaException {
-    parent.checkValid();
     if (context == null) {
       return null;
     }

@@ -18,38 +18,35 @@ public class PackageLuaObject implements LuaComparable {
 
 	public PackagerBlockEntity blockEntity;
 	public ItemStack box;
+	public String address;
+	// address is the only mutable data of the package.
+	// we update this along with .setAddress().
+	// if the package changes address for any other reason, we don't know that.
 
 	public PackageLuaObject(PackagerBlockEntity blockEntity, ItemStack box) {
 		this.blockEntity = blockEntity;
 		this.box = box;
+		this.address = PackageItem.getAddress(box);
 	}
 
 	@LuaFunction(mainThread = true)
-	public final boolean isValid() {
-		return blockEntity == null || (!blockEntity.heldBox.isEmpty() && blockEntity.heldBox == box);
-	}
-
-	public final void checkValid() throws LuaException {
-		if (!isValid())
-			throw new LuaException("Invalid package object");
-	}
-
-	public final void checkEditable() throws LuaException {
-		if (blockEntity == null)
-			throw new LuaException("Package is not editable");
+	public final boolean isEditable() {
+		return (blockEntity != null && !blockEntity.heldBox.isEmpty() && blockEntity.heldBox == box);
 	}
 
 	@LuaFunction(mainThread = true)
 	public final String getAddress() throws LuaException {
-		checkValid();
-		return PackageItem.getAddress(box);
+		if (isEditable())
+			return PackageItem.getAddress(box);
+		return this.address;
 	}
 
 	@LuaFunction(mainThread = true)
 	public final void setAddress(String argument) throws LuaException {
-		checkValid();
-		checkEditable();
+		if (!isEditable())
+			throw new LuaException("Package is not editable");
 		PackageItem.addAddress(box, argument);
+		this.address = argument;
 	}
 
 	@LuaFunction(mainThread = true)
@@ -59,7 +56,6 @@ public class PackageLuaObject implements LuaComparable {
 
 	@LuaFunction(mainThread = true)
 	public Map<String, ?> getItemDetail(int slot) throws LuaException {
-		checkValid();
 		return ComputerUtil.getItemDetail(PackageItem.getContents(box), slot);
 	}
 
@@ -69,7 +65,6 @@ public class PackageLuaObject implements LuaComparable {
 
 	@LuaFunction(mainThread = true)
 	public final PackageOrderLuaObject getOrderData() throws LuaException {
-		checkValid();
 
 		if (!hasOrderData())
 			return null;
