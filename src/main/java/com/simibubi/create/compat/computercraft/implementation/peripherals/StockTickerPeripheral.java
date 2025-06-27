@@ -51,9 +51,10 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 	@LuaFunction(mainThread = true)
 	public final int requestFiltered(String address, IArguments filters) throws LuaException {
 
-		List<PackageOrder> orders = new ArrayList<>();
 
+			List<BigItemStack> validItems = new ArrayList<>();
 		int totalItemsSent = 0;
+		List<BigItemStack> stock = blockEntity.getAccurateSummary().getStacks();
 
 		for (int i = 1; i < filters.count(); i++) {
 			if (!(filters.get(i) instanceof Map<?, ?> filterTable))
@@ -78,25 +79,24 @@ public class StockTickerPeripheral extends SyncedPeripheral<StockTickerBlockEnti
 					throw new LuaException("_requestCount must be a positive number or nil for no limit");
 			}
 
-			List<BigItemStack> validItems = new ArrayList<>();
-			for (BigItemStack entry : blockEntity.getAccurateSummary().getStacks()) {
+			for (BigItemStack entry : stock) {
 				int foundItems = ComputerUtil.bigItemStackToLuaTableFilter(entry, filter);
 				if (foundItems > 0) {
 					int toTake = Math.min(foundItems, itemsRequested);
 					itemsRequested -= toTake;
 					totalItemsSent += toTake;
-					entry.count = toTake;
-					validItems.add(entry);
+					BigItemStack requestedItem = new BigItemStack(entry.stack, toTake);
+					entry.count -= toTake; // we could also probably free the entry but i dont feel like refactoring this
+					validItems.add(requestedItem);
 				}
 				if (itemsRequested <= 0)
 					break;
 			}
-
-			orders.add(new PackageOrder(validItems));
 		}
 
-		for (var order : orders)
-			blockEntity.broadcastPackageRequest(RequestType.RESTOCK, order, null, address);
+		PackageOrder order = new PackageOrder(validItems);
+
+		blockEntity.broadcastPackageRequest(RequestType.RESTOCK, order, null, address);
 
 		return totalItemsSent;
 	}
