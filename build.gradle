@@ -313,7 +313,7 @@ project.publishing {
             artifactId base.archivesName.get()
             from components.java
 
-            artifact(tasks.jar) {
+            artifact(tasks.reobfJar) {
                 classifier = "all"
             }
         }
