@@ -107,6 +107,8 @@ public class NixieTubeBlockEntity extends SmartBlockEntity {
 				cachedSignalTE = new WeakReference<>(null);
 			}
 			return;
+		} else {
+			computerSignal = null;
 		}
 
 		SignalBlockEntity signalBlockEntity = cachedSignalTE.get();
